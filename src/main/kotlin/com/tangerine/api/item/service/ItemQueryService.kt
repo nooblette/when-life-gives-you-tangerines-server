@@ -9,8 +9,5 @@ import org.springframework.stereotype.Service
 class ItemQueryService(
     private val itemQueryRepository: ItemQueryRepository,
 ) {
-    fun findAll(): List<Item> {
-        val t = itemQueryRepository.findAll()
-        return t.toDomains()
-    }
+    fun findAll(): List<Item> = itemQueryRepository.findAll().toDomains()
 }
