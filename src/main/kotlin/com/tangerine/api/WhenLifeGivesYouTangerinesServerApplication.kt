@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class WhenLifeGivesYouTangerinesServerApplication
 
 fun main(args: Array<String>) {
-	runApplication<WhenLifeGivesYouTangerinesServerApplication>(*args)
+    runApplication<WhenLifeGivesYouTangerinesServerApplication>(*args)
 }
