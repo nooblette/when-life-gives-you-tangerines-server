@@ -1,0 +1,29 @@
+package com.tangerine.api.order.service
+
+import com.tangerine.api.order.domain.Order
+import com.tangerine.api.order.domain.OrderIdGenerator
+import com.tangerine.api.order.mapper.toEntity
+import com.tangerine.api.order.repository.OrderCommandRepository
+import com.tangerine.api.order.repository.OrderItemCommandRepository
+import com.tangerine.api.order.result.OrderPlacementResult
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+@Service
+class OrderCommandService(
+    private val orderCommandRepository: OrderCommandRepository,
+    private val orderItemCommandRepository: OrderItemCommandRepository,
+    private val orderIdGenerator: OrderIdGenerator,
+) {
+    @Transactional
+    fun place(order: Order): OrderPlacementResult {
+        val orderId = orderIdGenerator.generate()
+
+        // 주문 생성
+        val placedOrder = orderCommandRepository.save(order.toEntity(orderId))
+
+        // 주문 상품 생성
+        orderItemCommandRepository.saveAll(order.items.map { it.toEntity(placedOrder) })
+        return OrderPlacementResult.Success(orderId = orderId)
+    }
+}

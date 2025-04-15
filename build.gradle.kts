@@ -32,9 +32,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    // Kotest core
+    testImplementation("io.kotest:kotest-runner-junit5:5.8.0") // Kotest + JUnit5 통합 실행기
+    testImplementation("io.kotest:kotest-assertions-core:5.8.0") // 핵심 assertion
+    testImplementation("io.kotest:kotest-property:5.8.0") // property-based testing (선택)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -51,5 +56,9 @@ allOpen {
 }
 
 tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+tasks.test {
     useJUnitPlatform()
 }
