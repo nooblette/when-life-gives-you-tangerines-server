@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotNull
 
 data class OrderItemRequest(
     @field:NotNull
-    val id: Long,
+    val id: Long?,
     @field:NotBlank
-    val name: String,
-    @field:Min(0)
-    val price: Int,
-    @field:Min(1)
-    val quantity: Int,
+    val name: String?,
+    @field:NotNull @field:Min(0)
+    val price: Int?,
+    @field:NotNull @field:Min(1)
+    val quantity: Int?,
 )

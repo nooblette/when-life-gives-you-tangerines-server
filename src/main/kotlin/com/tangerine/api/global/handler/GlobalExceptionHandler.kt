@@ -1,13 +1,12 @@
 package com.tangerine.api.global.handler
 
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.tangerine.api.global.response.ApiResult
+import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.global.response.ValidationError
 import com.tangerine.api.global.response.ValidationErrorResponse
-import jakarta.servlet.http.HttpServletRequest
+import com.tangerine.api.order.exception.MissingRequestFieldException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -15,7 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 @RestControllerAdvice
 class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handlerMethodArgumentNotValidException(exception: MethodArgumentNotValidException): ResponseEntity<ApiResult<Nothing>> {
+    fun handleMethodArgumentNotValidException(exception: MethodArgumentNotValidException): ResponseEntity<ApiResult<Nothing>> {
         val errors =
             exception.bindingResult.fieldErrors.map { fieldError ->
                 ValidationError(
@@ -24,42 +23,23 @@ class GlobalExceptionHandler {
                 )
             }
 
-        val response =
+        return ResponseEntity(
             ValidationErrorResponse(
                 message = "유효성 검사에 실패했습니다.",
-                code = "NOT_VALID_ARGUMENT",
+                code = ErrorCodes.INVALID_ARGUMENT,
                 errors = errors,
-            )
-
-        return ResponseEntity(response, HttpStatus.BAD_REQUEST)
+            ),
+            HttpStatus.BAD_REQUEST,
+        )
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException::class)
-    fun handleJsonParseError(
-        exception: HttpMessageNotReadableException,
-        request: HttpServletRequest,
-    ): ResponseEntity<ValidationErrorResponse> {
-        val errors = mutableListOf<ValidationError>()
-
-        val cause = exception.mostSpecificCause
-        if (cause is MismatchedInputException) {
-            cause.path?.forEach { ref ->
-                errors.add(
-                    ValidationError(
-                        field = ref.fieldName ?: "(unknown)",
-                        message = "${ref.from?.javaClass?.simpleName}.${ref.fieldName} 필드가 누락되었거나 형식이 잘못되었습니다.",
-                    ),
-                )
-            }
-        }
-
-        val response =
+    @ExceptionHandler(MissingRequestFieldException::class)
+    fun handleMissingRequestFieldException(exception: MissingRequestFieldException): ResponseEntity<ApiResult<Nothing>> =
+        ResponseEntity(
             ValidationErrorResponse(
-                message = "요청 본문이 잘못되었습니다.",
-                code = "INVALID_JSON_REQUEST",
-                errors = errors,
-            )
-
-        return ResponseEntity(response, HttpStatus.BAD_REQUEST)
-    }
+                message = exception.message ?: "필수 요청 파라미터가 누락되었습니다.",
+                code = ErrorCodes.MISSING_FIELD,
+            ),
+            HttpStatus.BAD_REQUEST,
+        )
 }

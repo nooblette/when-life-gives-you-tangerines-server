@@ -14,7 +14,7 @@ open class Error(
 class ValidationErrorResponse(
     message: String,
     code: String,
-    val errors: List<ValidationError>,
+    val errors: List<ValidationError> = emptyList(),
 ) : Error(message, code)
 
 class ValidationError(
