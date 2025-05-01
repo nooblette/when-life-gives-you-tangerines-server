@@ -1,12 +1,13 @@
 package com.tangerine.api.global.handler
 
-import com.tangerine.api.global.response.ApiResult
+import com.fasterxml.jackson.databind.JsonMappingException
+import com.tangerine.api.global.response.Error
 import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.global.response.ValidationError
 import com.tangerine.api.global.response.ValidationErrorResponse
-import com.tangerine.api.order.exception.MissingRequestFieldException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 @RestControllerAdvice
 class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleMethodArgumentNotValidException(exception: MethodArgumentNotValidException): ResponseEntity<ApiResult<Nothing>> {
+    fun handleMethodArgumentNotValidException(exception: MethodArgumentNotValidException): ResponseEntity<Error> {
         val errors =
             exception.bindingResult.fieldErrors.map { fieldError ->
                 ValidationError(
@@ -33,13 +34,49 @@ class GlobalExceptionHandler {
         )
     }
 
-    @ExceptionHandler(MissingRequestFieldException::class)
-    fun handleMissingRequestFieldException(exception: MissingRequestFieldException): ResponseEntity<ApiResult<Nothing>> =
-        ResponseEntity(
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadable(exception: HttpMessageNotReadableException): ResponseEntity<ValidationErrorResponse> {
+        // 내부 원인이 JsonMappingException인 경우만 처리
+        // 필수 파라미터 누락으로 코틀린 객체 생성 실패시 발생하는 MissingKotlinParameterException 예외도 JsonMappingException 예외를 상속
+        val mappingEx = exception.cause as? JsonMappingException
+
+        // JsonMappingException.path 에 쌓인 Reference 를 full path 로 변환
+        val fieldName =
+            mappingEx
+                ?.path
+                ?.let { toFieldName(it) }
+                ?: "unknown"
+
+        // 누락된 필드로 에러 응답1
+        val error =
+            ValidationError(
+                field = fieldName,
+                message = "${fieldName}는 필수 값입니다.",
+            )
+
+        return ResponseEntity(
             ValidationErrorResponse(
-                message = exception.message ?: "필수 요청 파라미터가 누락되었습니다.",
+                message = "필수 요청 파라미터가 누락되었습니다.",
                 code = ErrorCodes.MISSING_FIELD,
+                errors = listOf(error),
             ),
             HttpStatus.BAD_REQUEST,
         )
+    }
+
+    private fun toFieldName(path: List<JsonMappingException.Reference>): String {
+        val sb = StringBuilder()
+        path.forEach { reference ->
+            if (reference.fieldName != null) {
+                if (sb.isNotEmpty()) sb.append('.')
+                sb.append(reference.fieldName)
+            } else {
+                sb
+                    .append('[')
+                    .append(reference.index)
+                    .append(']')
+            }
+        }
+        return sb.toString()
+    }
 }

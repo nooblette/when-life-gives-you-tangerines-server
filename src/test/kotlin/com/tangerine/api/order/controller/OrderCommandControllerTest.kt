@@ -2,6 +2,7 @@ package com.tangerine.api.order.controller
 
 import com.tangerine.api.global.handler.GlobalExceptionHandler
 import com.tangerine.api.global.response.ErrorCodes
+import com.tangerine.api.order.fixture.JsonOrderRequestBuilder
 import com.tangerine.api.order.fixture.OrderRequestBuilder
 import com.tangerine.api.order.service.OrderCommandService
 import org.junit.jupiter.api.Test
@@ -26,23 +27,68 @@ class OrderCommandControllerTest {
     @Test
     fun `주문 요청 중 주문 정보 고객 필드가 누락되면 400에러를 반환한다`() {
         val requestOrder =
-            OrderRequestBuilder()
+            JsonOrderRequestBuilder()
                 .withoutCustomer()
+                .withDefaultItems()
+                .withDefaultTotalAmount()
                 .build()
 
         performOrderRequest(requestOrder)
-            .assertInvalidArgument()
+            .assertResponseCode(ErrorCodes.MISSING_FIELD)
     }
 
     @Test
     fun `주문 요청 중 주문 상품 필드가 누락되면 400에러를 반환한다`() {
         val requestOrder =
-            OrderRequestBuilder()
+            JsonOrderRequestBuilder()
+                .withDefaultCustomer()
                 .withoutItems()
+                .withDefaultTotalAmount()
                 .build()
 
         performOrderRequest(requestOrder)
-            .assertInvalidArgument()
+            .assertResponseCode(ErrorCodes.MISSING_FIELD)
+    }
+
+    @Test
+    fun `주문 요청 중 총 금액 필드가 누락되면 400에러를 반환한다`() {
+        val requestOrder =
+            JsonOrderRequestBuilder()
+                .withDefaultCustomer()
+                .withDefaultItems()
+                .withoutTotalAmount()
+                .build()
+
+        performOrderRequest(requestOrder)
+            .assertResponseCode(ErrorCodes.MISSING_FIELD)
+    }
+
+    @Test
+    fun `주문 요청 중 주문 정보 고객의 필수 값이 누락되면 400에러를 반환한다`() {
+        val requestOrder =
+            JsonOrderRequestBuilder()
+                .withDefaultCustomer()
+                .withDefaultItems()
+                .withDefaultTotalAmount()
+                .withoutCustomerField(fieldName = "name")
+                .build()
+
+        performOrderRequest(requestOrder)
+            .assertResponseCode(ErrorCodes.MISSING_FIELD)
+    }
+
+    @Test
+    fun `주문 요청 중 주문 상품의 필수 값이 누락되면 400에러를 반환한다`() {
+        val requestOrder =
+            JsonOrderRequestBuilder()
+                .withDefaultCustomer()
+                .withDefaultItems()
+                .withDefaultTotalAmount()
+                .withoutItemFieldAt(index = 0, fieldName = "price")
+                .build()
+
+        performOrderRequest(requestOrder)
+            .assertResponseCode(ErrorCodes.MISSING_FIELD)
     }
 
     @Test
@@ -53,18 +99,7 @@ class OrderCommandControllerTest {
                 .build()
 
         performOrderRequest(requestOrder)
-            .assertInvalidArgument()
-    }
-
-    @Test
-    fun `주문 요청 중 총 금액 필드가 누락되면 400에러를 반환한다`() {
-        val requestOrder =
-            OrderRequestBuilder()
-                .withoutTotalAmount()
-                .build()
-
-        performOrderRequest(requestOrder)
-            .assertInvalidArgument()
+            .assertResponseCode(ErrorCodes.INVALID_ARGUMENT)
     }
 
     @Test
@@ -75,52 +110,40 @@ class OrderCommandControllerTest {
                 .build()
 
         performOrderRequest(requestOrder)
-            .assertInvalidArgument()
+            .assertResponseCode(ErrorCodes.INVALID_ARGUMENT)
     }
 
     @Test
-    fun `주문 요청 중 주문 정보 고객의 필수 값이 누락되면 400에러를 반환한다`() {
+    fun `주문 요청 중 주문 정보 고객 필드가 공백이면 400에러를 반환한다`() {
         val requestOrder =
             OrderRequestBuilder()
-                .withoutCustomerField(fieldName = "name")
-                .withoutCustomerField(fieldName = "zipCode")
+                .withCustomerNameBlank()
                 .build()
 
         performOrderRequest(requestOrder)
-            .assertInvalidArgument()
+            .assertResponseCode(ErrorCodes.INVALID_ARGUMENT)
     }
 
     @Test
-    fun `주문 요청 중 주문 상품의 id가 누락되면 400에러를 반환한다`() {
+    fun `주문 요청 중 주문 금액이 음수이면 400에러를 반환한다`() {
         val requestOrder =
             OrderRequestBuilder()
-                .withoutItemField(index = 0, fieldName = "id")
+                .withOrderItemMinusPrice()
                 .build()
 
         performOrderRequest(requestOrder)
-            .assertInvalidArgument()
+            .assertResponseCode(ErrorCodes.INVALID_ARGUMENT)
     }
 
     @Test
-    fun `주문 요청 중 주문 상품의 이름이 누락되면 400에러를 반환한다`() {
+    fun `주문 요청 중 주문 수량이 0이면 400에러를 반환한다`() {
         val requestOrder =
             OrderRequestBuilder()
-                .withoutItemField(index = 0, fieldName = "name")
+                .withOrderItemQuantityZero()
                 .build()
 
         performOrderRequest(requestOrder)
-            .assertInvalidArgument()
-    }
-
-    @Test
-    fun `주문 요청 중 주문 상품의 가격이 누락되면 400에러를 반환한다`() {
-        val requestOrder =
-            OrderRequestBuilder()
-                .withoutItemField(index = 0, fieldName = "price")
-                .build()
-
-        performOrderRequest(requestOrder)
-            .assertInvalidArgument()
+            .assertResponseCode(ErrorCodes.INVALID_ARGUMENT)
     }
 
     // Api 호출
@@ -131,10 +154,10 @@ class OrderCommandControllerTest {
         }
 
     // 응답 및 에러 코드 검증
-    private fun ResultActionsDsl.assertInvalidArgument() {
+    private fun ResultActionsDsl.assertResponseCode(errorCode: String) {
         this.andExpect {
             status { isBadRequest() }
-            jsonPath("$.code") { value(ErrorCodes.INVALID_ARGUMENT) }
+            jsonPath("$.code") { value(errorCode) }
         }
     }
 

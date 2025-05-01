@@ -4,14 +4,14 @@ import jakarta.validation.constraints.NotBlank
 
 data class CustomerRequest(
     @field:NotBlank
-    val name: String?,
+    val name: String,
     @field:NotBlank
-    val recipient: String?,
+    val recipient: String,
     @field:NotBlank
-    val phone: String?,
+    val phone: String,
     @field:NotBlank
-    val address: String?,
+    val address: String,
     val detailAddress: String?,
     @field:NotBlank
-    val zipCode: String?,
+    val zipCode: String,
 )
