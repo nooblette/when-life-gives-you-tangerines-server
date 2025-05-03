@@ -4,8 +4,12 @@ import com.tangerine.api.global.handler.GlobalExceptionHandler
 import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.order.fixture.JsonOrderRequestBuilder
 import com.tangerine.api.order.fixture.OrderRequestBuilder
+import com.tangerine.api.order.fixture.TestOrderIdGenerator
+import com.tangerine.api.order.result.OrderPlacementResult
 import com.tangerine.api.order.service.OrderCommandService
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
@@ -144,6 +148,29 @@ class OrderCommandControllerTest {
 
         performOrderRequest(requestOrder)
             .assertResponseCode(ErrorCodes.INVALID_ARGUMENT)
+    }
+
+    @Test
+    fun `주문 요청 성공 테스트`() {
+        // given
+        val orderId = TestOrderIdGenerator.STUB_ORDER_ID
+        whenever(orderCommandService.place(any()))
+            .thenReturn(OrderPlacementResult.Success(orderId))
+
+        // when
+        val requestOrder =
+            JsonOrderRequestBuilder()
+                .withDefaultCustomer()
+                .withDefaultItems()
+                .withDefaultTotalAmount()
+                .build()
+
+        // then
+        performOrderRequest(requestOrder)
+            .andExpect {
+                status { isOk() }
+                jsonPath("$.orderId") { value(orderId) }
+            }
     }
 
     // Api 호출

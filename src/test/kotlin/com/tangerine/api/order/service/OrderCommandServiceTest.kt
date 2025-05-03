@@ -5,13 +5,13 @@ import com.tangerine.api.item.entity.ItemEntity
 import com.tangerine.api.item.mapper.toDomain
 import com.tangerine.api.item.repository.ItemCommandRepository
 import com.tangerine.api.order.common.OrderStatus
-import com.tangerine.api.order.domain.Order
-import com.tangerine.api.order.domain.OrderIdGenerator
 import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity
 import com.tangerine.api.order.fixture.OrderItemInput
 import com.tangerine.api.order.fixture.OrderItemInputs
-import com.tangerine.api.order.fixture.createNewOrder
+import com.tangerine.api.order.fixture.TestOrderIdGenerator
+import com.tangerine.api.order.fixture.TestOrderIdGenerator.Companion.STUB_ORDER_ID
+import com.tangerine.api.order.fixture.createPlaceOrderCommand
 import com.tangerine.api.order.mapper.toDomain
 import com.tangerine.api.order.repository.OrderItemQueryRepository
 import com.tangerine.api.order.repository.OrderQueryRepository
@@ -24,14 +24,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.Primary
 import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
-@Import(OrderCommandServiceTest.TestConfig::class)
+@Import(TestOrderIdGenerator::class)
 @Transactional
 class OrderCommandServiceTest {
     @Autowired
@@ -46,7 +43,7 @@ class OrderCommandServiceTest {
     @Autowired
     lateinit var itemCommandRepository: ItemCommandRepository
 
-    lateinit var newOrder: Order
+    lateinit var newOrder: PlaceOrderCommand
     lateinit var newOrderItemInputs: OrderItemInputs
 
     @BeforeEach
@@ -75,7 +72,7 @@ class OrderCommandServiceTest {
                     OrderItemInput(item2.toDomain(), quantity = 1),
                 ),
             )
-        newOrder = createNewOrder(orderItemInputs = newOrderItemInputs)
+        newOrder = createPlaceOrderCommand(orderItemInputs = newOrderItemInputs)
     }
 
     @Test
@@ -110,19 +107,5 @@ class OrderCommandServiceTest {
         placementOrderItems shouldNotBe null
         placementOrderItems shouldHaveSize newOrderItemInputs.size()
         placementOrderItems.map { it.toDomain() } shouldBe newOrderItemInputs.toOrderItems()
-    }
-
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        @Primary
-        fun stubOrderIdGenerator(): OrderIdGenerator =
-            object : OrderIdGenerator {
-                override fun generate(): String = STUB_ORDER_ID
-            }
-    }
-
-    companion object {
-        const val STUB_ORDER_ID = "TEST-ORDER-123"
     }
 }

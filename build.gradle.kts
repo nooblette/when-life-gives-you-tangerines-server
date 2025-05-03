@@ -40,6 +40,7 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:5.8.0") // Kotest + JUnit5 통합 실행기
     testImplementation("io.kotest:kotest-assertions-core:5.8.0") // 핵심 assertion
     testImplementation("io.kotest:kotest-property:5.8.0") // property-based testing (선택)
+    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0") // Mockito-Kotlin 확장
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
