@@ -1,11 +1,11 @@
 package com.tangerine.api.order.fixture
 
 import com.tangerine.api.order.domain.Customer
-import com.tangerine.api.order.domain.Order
 import com.tangerine.api.order.domain.OrderItem
+import com.tangerine.api.order.service.PlaceOrderCommand
 
-fun createNewOrder(orderItemInputs: OrderItemInputs): Order =
-    Order(
+fun createPlaceOrderCommand(orderItemInputs: OrderItemInputs): PlaceOrderCommand =
+    PlaceOrderCommand(
         customer = createTestCustomer(),
         items = createNewOrderItems(orderItemInputs),
         totalAmount = orderItemInputs.getTotalAmount(),

@@ -1,6 +1,5 @@
 package com.tangerine.api.order.service
 
-import com.tangerine.api.order.domain.Order
 import com.tangerine.api.order.domain.OrderIdGenerator
 import com.tangerine.api.order.mapper.toEntity
 import com.tangerine.api.order.repository.OrderCommandRepository
@@ -16,14 +15,14 @@ class OrderCommandService(
     private val orderIdGenerator: OrderIdGenerator,
 ) {
     @Transactional
-    fun place(order: Order): OrderPlacementResult {
+    fun place(placeOrderCommand: PlaceOrderCommand): OrderPlacementResult {
         val orderId = orderIdGenerator.generate()
 
         // 주문 생성
-        val placedOrder = orderCommandRepository.save(order.toEntity(orderId))
+        val placedOrder = orderCommandRepository.save(placeOrderCommand.toEntity(orderId))
 
         // 주문 상품 생성
-        orderItemCommandRepository.saveAll(order.items.map { it.toEntity(placedOrder) })
+        orderItemCommandRepository.saveAll(placeOrderCommand.items.map { it.toEntity(placedOrder) })
         return OrderPlacementResult.Success(orderId = orderId)
     }
 }

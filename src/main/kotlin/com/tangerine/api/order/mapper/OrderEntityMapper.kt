@@ -1,11 +1,11 @@
 package com.tangerine.api.order.mapper
 
-import com.tangerine.api.order.domain.Order
 import com.tangerine.api.order.domain.OrderItem
 import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity
+import com.tangerine.api.order.service.PlaceOrderCommand
 
-fun Order.toEntity(orderId: String) =
+fun PlaceOrderCommand.toEntity(orderId: String) =
     OrderEntity(
         orderId = orderId,
         name = customer.name,
