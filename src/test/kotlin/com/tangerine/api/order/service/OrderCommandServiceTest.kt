@@ -1,13 +1,10 @@
 package com.tangerine.api.order.service
 
-import com.tangerine.api.item.common.UnitType
-import com.tangerine.api.item.entity.ItemEntity
-import com.tangerine.api.item.mapper.toDomain
+import com.tangerine.api.item.fixture.createTestItemEntity
 import com.tangerine.api.item.repository.ItemCommandRepository
 import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity
-import com.tangerine.api.order.fixture.OrderItemInput
 import com.tangerine.api.order.fixture.OrderItemInputs
 import com.tangerine.api.order.fixture.TestOrderIdGenerator
 import com.tangerine.api.order.fixture.TestOrderIdGenerator.Companion.STUB_ORDER_ID
@@ -48,29 +45,15 @@ class OrderCommandServiceTest {
 
     @BeforeEach
     fun setUp() {
-        val item1 =
-            ItemEntity(
-                name = "제주 노지 감귤 (10~15개입)",
-                price = 12000,
-                unit = UnitType.KG,
-                quantity = 10,
-            )
-
-        val item2 =
-            ItemEntity(
-                name = "제주 노지 감귤 (10~15개입)",
-                price = 12000,
-                unit = UnitType.KG,
-                quantity = 10,
-            )
-
-        itemCommandRepository.saveAll(listOf(item1, item2))
+        val testItemEntities = createTestItemEntity(itemCommandRepository::saveAll)
         newOrderItemInputs =
-            OrderItemInputs(
-                listOf(
-                    OrderItemInput(item1.toDomain(), quantity = 2),
-                    OrderItemInput(item2.toDomain(), quantity = 1),
-                ),
+            OrderItemInputs.createTestOrderItemInputs(
+                quantityByIndex =
+                    mapOf(
+                        0 to 2,
+                        1 to 1,
+                    ),
+                testItemEntities = testItemEntities,
             )
         newOrder = createPlaceOrderCommand(orderItemInputs = newOrderItemInputs)
     }
