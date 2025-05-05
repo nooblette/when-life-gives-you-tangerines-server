@@ -1,10 +1,10 @@
 package com.tangerine.api.order.service
 
-import com.tangerine.api.item.fixture.createTestItemEntity
-import com.tangerine.api.item.repository.ItemCommandRepository
-import com.tangerine.api.order.fixture.OrderItemInputs
-import com.tangerine.api.order.fixture.TestOrderIdGenerator
-import com.tangerine.api.order.fixture.createPlaceOrderCommand
+import com.tangerine.api.order.domain.OrderItem
+import com.tangerine.api.order.entity.OrderEntity
+import com.tangerine.api.order.entity.OrderItemEntity
+import com.tangerine.api.order.fixture.domain.createPlaceOrderCommand
+import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
 import com.tangerine.api.order.mapper.toDomain
 import com.tangerine.api.order.mapper.toDomains
 import com.tangerine.api.order.mapper.toEntity
@@ -30,25 +30,11 @@ class OrderQueryServiceTest {
     @Autowired
     private lateinit var orderItemCommandRepository: OrderItemCommandRepository
 
-    @Autowired
-    private lateinit var itemCommandRepository: ItemCommandRepository
-
-    private lateinit var newOrderItemInputs: OrderItemInputs
     private lateinit var newOrder: PlaceOrderCommand
 
     @BeforeEach
     fun setUp() {
-        val testItemEntities = createTestItemEntity(itemCommandRepository::saveAll)
-        newOrderItemInputs =
-            OrderItemInputs.createTestOrderItemInputs(
-                quantityByIndex =
-                    mapOf(
-                        0 to 2,
-                        1 to 1,
-                    ),
-                testItemEntities = testItemEntities,
-            )
-        newOrder = createPlaceOrderCommand(orderItemInputs = newOrderItemInputs)
+        newOrder = createPlaceOrderCommand()
     }
 
     @Test
@@ -63,8 +49,7 @@ class OrderQueryServiceTest {
         // given
         val orderID = TestOrderIdGenerator.STUB_ORDER_ID
         val orderEntity = orderCommandRepository.save(newOrder.toEntity(orderID))
-        val orderItemEntities =
-            orderItemCommandRepository.saveAll(newOrderItemInputs.toOrderItemEntity(order = orderEntity))
+        val orderItemEntities = orderItemCommandRepository.saveAll(newOrder.items.toEntities(orderEntity))
         val expectedOrder = orderEntity.toDomain(orderItemEntities.toDomains())
 
         // when
@@ -73,4 +58,7 @@ class OrderQueryServiceTest {
         // then
         actualOrder shouldBe expectedOrder
     }
+
+    private fun List<OrderItem>.toEntities(orderEntity: OrderEntity): List<OrderItemEntity> =
+        this.map { orderItem -> orderItem.toEntity(orderEntity) }
 }

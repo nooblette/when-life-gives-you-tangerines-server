@@ -3,14 +3,14 @@ package com.tangerine.api.item.api.response
 import com.tangerine.api.item.common.UnitType
 
 data class ItemResponse(
-    val id: Long? = null,
+    val id: Long,
     val name: String,
     val weight: String,
     val price: Int,
 ) {
     companion object {
         fun of(
-            id: Long?,
+            id: Long,
             name: String,
             quantity: Int,
             unit: UnitType,

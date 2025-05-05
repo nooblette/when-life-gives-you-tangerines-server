@@ -30,20 +30,22 @@ fun OrderItem.toEntity(order: OrderEntity) =
 
 fun OrderEntity.toDomain(items: List<OrderItem>) =
     Order(
-        id = requireNotNull(id) { "주문 Id가 없습니다. " },
+        id = requireNotNull(id) { "주문 Id가 없습니다." },
         orderId = orderId,
-        customer =
-            Customer.purchaser(
-                name = name,
-                recipient = recipient,
-                phone = phone,
-                address = address,
-                detailAddress = detailAddress,
-                zipCode = zipCode,
-            ),
+        customer = toPurchaser(),
         items = items,
         totalAmount = totalAmount,
         status = status,
+    )
+
+private fun OrderEntity.toPurchaser() =
+    Customer.purchaser(
+        name = name,
+        recipient = recipient,
+        phone = phone,
+        address = address,
+        detailAddress = detailAddress,
+        zipCode = zipCode,
     )
 
 fun List<OrderItemEntity>.toDomains() = this.map { it.toDomain() }

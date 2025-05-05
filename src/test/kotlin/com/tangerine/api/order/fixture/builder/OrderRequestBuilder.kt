@@ -1,4 +1,4 @@
-package com.tangerine.api.order.fixture
+package com.tangerine.api.order.fixture.builder
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

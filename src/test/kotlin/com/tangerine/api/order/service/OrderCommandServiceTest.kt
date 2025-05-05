@@ -1,14 +1,11 @@
 package com.tangerine.api.order.service
 
-import com.tangerine.api.item.fixture.createTestItemEntity
-import com.tangerine.api.item.repository.ItemCommandRepository
 import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity
-import com.tangerine.api.order.fixture.OrderItemInputs
-import com.tangerine.api.order.fixture.TestOrderIdGenerator
-import com.tangerine.api.order.fixture.TestOrderIdGenerator.Companion.STUB_ORDER_ID
-import com.tangerine.api.order.fixture.createPlaceOrderCommand
+import com.tangerine.api.order.fixture.domain.createPlaceOrderCommand
+import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
+import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator.Companion.STUB_ORDER_ID
 import com.tangerine.api.order.mapper.toDomain
 import com.tangerine.api.order.repository.OrderItemQueryRepository
 import com.tangerine.api.order.repository.OrderQueryRepository
@@ -37,25 +34,11 @@ class OrderCommandServiceTest {
     @Autowired
     lateinit var orderItemQueryRepository: OrderItemQueryRepository
 
-    @Autowired
-    lateinit var itemCommandRepository: ItemCommandRepository
-
     lateinit var newOrder: PlaceOrderCommand
-    lateinit var newOrderItemInputs: OrderItemInputs
 
     @BeforeEach
     fun setUp() {
-        val testItemEntities = createTestItemEntity(itemCommandRepository::saveAll)
-        newOrderItemInputs =
-            OrderItemInputs.createTestOrderItemInputs(
-                quantityByIndex =
-                    mapOf(
-                        0 to 2,
-                        1 to 1,
-                    ),
-                testItemEntities = testItemEntities,
-            )
-        newOrder = createPlaceOrderCommand(orderItemInputs = newOrderItemInputs)
+        newOrder = createPlaceOrderCommand()
     }
 
     @Test
@@ -67,28 +50,28 @@ class OrderCommandServiceTest {
         result.shouldBeInstanceOf<OrderPlacementResult.Success>()
         result.orderId shouldBe STUB_ORDER_ID
 
-        val placementOrder = orderQueryRepository.findByOrderId(result.orderId)
-        placementOrder shouldNotBe null
-        placementOrder?.let {
-            assertPlacementOrder(placementOrder)
-            assertPlacementOrderItem(orderItemQueryRepository.findByOrder(placementOrder))
+        val actualOrder = orderQueryRepository.findByOrderId(result.orderId)
+        actualOrder shouldNotBe null
+        actualOrder?.let {
+            assertPlacementOrder(actualOrder)
+            assertPlacementOrderItem(orderItemQueryRepository.findByOrder(actualOrder))
         }
     }
 
-    private fun assertPlacementOrder(placementOrder: OrderEntity) {
-        placementOrder.status shouldBe OrderStatus.INIT // 주문 생성시 초기 상태는 INIT
-        placementOrder.name shouldBe newOrder.customer.name
-        placementOrder.recipient shouldBe newOrder.customer.recipient
-        placementOrder.phone shouldBe newOrder.customer.phone
-        placementOrder.address shouldBe newOrder.customer.address
-        placementOrder.detailAddress shouldBe newOrder.customer.detailAddress
-        placementOrder.zipCode shouldBe newOrder.customer.zipCode
-        placementOrder.totalAmount shouldBe newOrder.totalAmount
+    private fun assertPlacementOrder(actualOrder: OrderEntity) {
+        actualOrder.status shouldBe OrderStatus.INIT // 주문 생성시 초기 상태는 INIT
+        actualOrder.name shouldBe newOrder.customer.name
+        actualOrder.recipient shouldBe newOrder.customer.recipient
+        actualOrder.phone shouldBe newOrder.customer.phone
+        actualOrder.address shouldBe newOrder.customer.address
+        actualOrder.detailAddress shouldBe newOrder.customer.detailAddress
+        actualOrder.zipCode shouldBe newOrder.customer.zipCode
+        actualOrder.totalAmount shouldBe newOrder.totalAmount
     }
 
-    private fun assertPlacementOrderItem(placementOrderItems: List<OrderItemEntity>) {
-        placementOrderItems shouldNotBe null
-        placementOrderItems shouldHaveSize newOrderItemInputs.size()
-        placementOrderItems.map { it.toDomain() } shouldBe newOrderItemInputs.toOrderItems()
+    private fun assertPlacementOrderItem(actualOrderItem: List<OrderItemEntity>) {
+        actualOrderItem shouldNotBe null
+        actualOrderItem shouldHaveSize newOrder.items.size
+        actualOrderItem.map(OrderItemEntity::toDomain) shouldBe newOrder.items
     }
 }

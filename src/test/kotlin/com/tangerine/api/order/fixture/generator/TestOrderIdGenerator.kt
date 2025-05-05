@@ -1,4 +1,4 @@
-package com.tangerine.api.order.fixture
+package com.tangerine.api.order.fixture.generator
 
 import com.tangerine.api.order.domain.OrderIdGenerator
 import org.springframework.boot.test.context.TestConfiguration

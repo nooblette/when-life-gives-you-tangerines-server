@@ -2,9 +2,9 @@ package com.tangerine.api.order.controller
 
 import com.tangerine.api.global.handler.GlobalExceptionHandler
 import com.tangerine.api.global.response.ErrorCodes
-import com.tangerine.api.order.fixture.JsonOrderRequestBuilder
-import com.tangerine.api.order.fixture.OrderRequestBuilder
-import com.tangerine.api.order.fixture.TestOrderIdGenerator
+import com.tangerine.api.order.fixture.builder.JsonOrderRequestBuilder
+import com.tangerine.api.order.fixture.builder.OrderRequestBuilder
+import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
 import com.tangerine.api.order.result.OrderPlacementResult
 import com.tangerine.api.order.service.OrderCommandService
 import org.junit.jupiter.api.Test

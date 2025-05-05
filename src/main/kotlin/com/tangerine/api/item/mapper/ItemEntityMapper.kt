@@ -7,7 +7,7 @@ fun List<ItemEntity>.toDomains(): List<Item> = map { it.toDomain() }
 
 fun ItemEntity.toDomain(): Item =
     Item(
-        id = id,
+        id = requireNotNull(id) { "상품 Id가 없습니다." },
         name = name,
         quantity = quantity,
         unit = unit,
