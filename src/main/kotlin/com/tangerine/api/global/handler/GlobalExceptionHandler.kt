@@ -79,4 +79,14 @@ class GlobalExceptionHandler {
         }
         return sb.toString()
     }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handlerIllegalArgumentException(exception: IllegalArgumentException): ResponseEntity<Error> =
+        ResponseEntity(
+            Error(
+                message = exception.message ?: "잘못된 요청입니다.",
+                code = ErrorCodes.INVALID_ARGUMENT,
+            ),
+            HttpStatus.BAD_REQUEST,
+        )
 }
