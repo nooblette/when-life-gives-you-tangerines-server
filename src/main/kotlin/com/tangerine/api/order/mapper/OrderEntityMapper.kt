@@ -36,6 +36,7 @@ fun OrderEntity.toDomain(items: List<OrderItem>) =
         items = items,
         totalAmount = totalAmount,
         status = status,
+        createdAt = createdAt,
     )
 
 private fun OrderEntity.toPurchaser() =
