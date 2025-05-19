@@ -1,5 +1,8 @@
 package com.tangerine.api.global.response
 
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+
 sealed class ApiResult<out T>
 
 class Success<out T>(
@@ -21,3 +24,9 @@ class ValidationError(
     val field: String,
     val message: String,
 )
+
+fun <T> ApiResult<T>.toResponseEntity(): ResponseEntity<out ApiResult<T>> =
+    when (this) {
+        is Error -> ResponseEntity(this, HttpStatus.BAD_REQUEST)
+        is Success -> ResponseEntity(this, HttpStatus.OK)
+    }

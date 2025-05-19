@@ -18,6 +18,12 @@ object OrderDomainFixture {
             orderStatus = OrderStatus.DONE,
         )
 
+    fun createInProgressOrder(orderId: String = STUB_ORDER_ID): Order =
+        order(
+            orderId = orderId,
+            orderStatus = OrderStatus.IN_PROGRESS,
+        )
+
     fun createExpiredOrderByStatus(orderId: String = STUB_ORDER_ID): Order =
         order(
             orderId = orderId,

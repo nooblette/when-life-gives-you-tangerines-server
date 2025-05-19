@@ -14,7 +14,7 @@ class OrderPaymentApprovalPolicy(
         totalAmountForPayment: Int,
     ): OrderPaymentEvaluationResult =
         when {
-            order.isDone -> OrderPaymentEvaluationResult.AlreadyDoneOrder()
+            order.isNotInit -> OrderPaymentEvaluationResult.AlreadyInProgressOrder()
             order.isExpired(timeProvider.now()) -> OrderPaymentEvaluationResult.ExpiredOrder()
             order.misMatches(totalAmountForPayment) -> OrderPaymentEvaluationResult.MisMatchedTotalAmount()
             else -> OrderPaymentEvaluationResult.Success()
