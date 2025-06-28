@@ -1,6 +1,5 @@
 package com.tangerine.api.order.controller
 
-import com.tangerine.api.global.handler.GlobalExceptionHandler
 import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.order.fixture.builder.JsonOrderRequestBuilder
 import com.tangerine.api.order.fixture.builder.OrderRequestBuilder
@@ -12,7 +11,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
@@ -20,7 +18,6 @@ import org.springframework.test.web.servlet.ResultActionsDsl
 import org.springframework.test.web.servlet.post
 
 @WebMvcTest(OrderCommandController::class)
-@Import(GlobalExceptionHandler::class)
 class OrderCommandControllerTest {
     @Autowired
     lateinit var mockMvc: MockMvc
@@ -167,7 +164,9 @@ class OrderCommandControllerTest {
 
         // then
         performOrderRequest(requestOrder)
-            .andExpect {
+            .andDo {
+                print() // 요청/응답 전체를 콘솔에 출력
+            }.andExpect {
                 status { isOk() }
                 jsonPath("$.orderId") { value(orderId) }
             }
@@ -182,10 +181,13 @@ class OrderCommandControllerTest {
 
     // 응답 및 에러 코드 검증
     private fun ResultActionsDsl.assertResponseCode(errorCode: String) {
-        this.andExpect {
-            status { isBadRequest() }
-            jsonPath("$.code") { value(errorCode) }
-        }
+        this
+            .andDo {
+                print() // 요청/응답 전체를 콘솔에 출력
+            }.andExpect {
+                status { isBadRequest() }
+                jsonPath("$.code") { value(errorCode) }
+            }
     }
 
     companion object {

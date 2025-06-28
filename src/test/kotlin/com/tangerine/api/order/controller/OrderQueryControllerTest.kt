@@ -2,7 +2,6 @@ package com.tangerine.api.order.controller
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.tangerine.api.global.handler.GlobalExceptionHandler
 import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.order.domain.Customer
 import com.tangerine.api.order.domain.OrderItem
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
@@ -23,7 +21,6 @@ import org.springframework.test.web.servlet.ResultActionsDsl
 import org.springframework.test.web.servlet.get
 
 @WebMvcTest(OrderQueryController::class)
-@Import(GlobalExceptionHandler::class)
 class OrderQueryControllerTest {
     @Autowired
     lateinit var mockMvc: MockMvc
@@ -40,7 +37,9 @@ class OrderQueryControllerTest {
             .thenThrow(IllegalArgumentException::class.java)
 
         performOrderRequest()
-            .andExpect {
+            .andDo {
+                print() // 요청/응답 전체를 콘솔에 출력
+            }.andExpect {
                 status { isBadRequest() }
                 jsonPath("$.code") { value(ErrorCodes.INVALID_ARGUMENT) }
             }
@@ -56,7 +55,9 @@ class OrderQueryControllerTest {
         // when
         val response =
             performOrderRequest()
-                .andExpect {
+                .andDo {
+                    print() // 요청/응답 전체를 콘솔에 출력
+                }.andExpect {
                     status { isOk() }
                 }.andReturn()
 
