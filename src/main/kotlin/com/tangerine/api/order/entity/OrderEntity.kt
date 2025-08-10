@@ -8,14 +8,18 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
+import jakarta.persistence.Version
 import java.time.LocalDateTime
 
 @Entity
 @Table(name = "orders")
 class OrderEntity(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    var id: Long? = null,
+    @Version
+    var version: Long = 0,
     @Column(nullable = false, unique = true)
     val orderId: String,
     @Column(nullable = false)
@@ -33,9 +37,14 @@ class OrderEntity(
     val totalAmount: Int,
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val status: OrderStatus = OrderStatus.INIT,
+    var status: OrderStatus = OrderStatus.INIT,
     @Column(nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
     @Column(nullable = false)
-    val updatedAt: LocalDateTime = LocalDateTime.now(),
-)
+    var updatedAt: LocalDateTime = LocalDateTime.now(),
+) {
+    @PreUpdate
+    fun onUpdate() {
+        this.updatedAt = LocalDateTime.now()
+    }
+}

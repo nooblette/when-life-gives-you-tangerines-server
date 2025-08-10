@@ -53,7 +53,7 @@ fun List<OrderItemEntity>.toDomains() = this.map { it.toDomain() }
 
 fun OrderItemEntity.toDomain() =
     OrderItem(
-        id = requireNotNull(id) { "주문 상품의 상품 Id가 없습니다." },
+        id = requireNotNull(id) { "주문 상품 Id가 없습니다." },
         name = name,
         price = price,
         quantity = quantity,

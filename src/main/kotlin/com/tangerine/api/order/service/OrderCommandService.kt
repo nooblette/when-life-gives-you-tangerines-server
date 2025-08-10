@@ -1,7 +1,5 @@
 package com.tangerine.api.order.service
 
-import com.tangerine.api.order.common.OrderStatus
-import com.tangerine.api.order.domain.Order
 import com.tangerine.api.order.domain.OrderIdGenerator
 import com.tangerine.api.order.mapper.toEntity
 import com.tangerine.api.order.repository.OrderCommandRepository
@@ -26,19 +24,5 @@ class OrderCommandService(
         // 주문 상품 생성
         orderItemCommandRepository.saveAll(placeOrderCommand.items.map { it.toEntity(placedOrder) })
         return OrderPlacementResult.Success(orderId = orderId)
-    }
-
-    @Transactional
-    fun update(order: Order) {
-        val existingOrder =
-            orderCommandRepository
-                .findById(order.id)
-                .orElseThrow { IllegalArgumentException("주문이 존재하지 않습니다.") }
-
-        // 이미 처리된 주문인 경우 상태를 변경하지 않는다.
-        if (existingOrder.status == OrderStatus.DONE) {
-            return
-        }
-        orderCommandRepository.save(order.toEntity())
     }
 }
