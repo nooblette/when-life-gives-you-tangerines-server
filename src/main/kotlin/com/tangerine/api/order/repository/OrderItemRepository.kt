@@ -4,6 +4,6 @@ import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface OrderItemQueryRepository : JpaRepository<OrderItemEntity, Long?> {
+interface OrderItemRepository : JpaRepository<OrderItemEntity, Long?> {
     fun findByOrder(order: OrderEntity): List<OrderItemEntity>
 }

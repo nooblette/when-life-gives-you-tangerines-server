@@ -7,7 +7,6 @@ fun createOrderEntity(
     totalAmount: Int,
 ): OrderEntity =
     OrderEntity(
-        id = 1L,
         orderId = orderId,
         name = "user 1",
         recipient = "user 1",

@@ -1,36 +1,40 @@
 package com.tangerine.api.order.service
 
-import com.tangerine.api.order.event.OrderPaymentEvent
+import com.tangerine.api.order.common.OrderStatus
+import com.tangerine.api.order.entity.OrderEntity
+import com.tangerine.api.order.entity.OrderItemEntity
+import com.tangerine.api.order.exception.OrderAlreadyInProgressException
 import com.tangerine.api.order.fixture.domain.createApproveOrderPaymentCommand
-import com.tangerine.api.order.fixture.domain.createPlaceOrderCommand
-import com.tangerine.api.order.policy.OrderPaymentApprovalPolicy
-import com.tangerine.api.order.repository.OrderQueryRepository
+import com.tangerine.api.order.fixture.entity.createOrderEntity
+import com.tangerine.api.order.fixture.entity.createOrderItemEntity
+import com.tangerine.api.order.repository.OrderItemRepository
+import com.tangerine.api.order.repository.OrderRepository
 import com.tangerine.api.order.result.OrderPaymentApprovalResult
 import com.tangerine.api.order.result.OrderPaymentEvaluationResult
-import com.tangerine.api.order.result.OrderPlacementResult
+import com.tangerine.api.order.result.OrderPaymentEvaluationResult.InProgressOrder
 import com.tangerine.api.order.service.command.ApproveOrderPaymentCommand
+import com.tangerine.api.payment.command.PaymentApprovalResult
+import com.tangerine.api.payment.command.PaymentApproveCommand
+import com.tangerine.api.payment.domain.PaymentStatus
+import com.tangerine.api.payment.fixture.command.equals
+import com.tangerine.api.payment.fixture.entity.findPaymentEntityByOrderId
+import com.tangerine.api.payment.port.PaymentGatewayPort
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import mu.KotlinLogging
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.ApplicationEventPublisher
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.Primary
-import org.springframework.stereotype.Component
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import org.springframework.transaction.event.TransactionalEventListener
-import org.springframework.transaction.support.TransactionSynchronization
-import org.springframework.transaction.support.TransactionSynchronizationManager
-import java.util.Collections
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.TimeUnit
@@ -38,51 +42,74 @@ import java.util.concurrent.TimeUnit
 private val logger = KotlinLogging.logger {}
 
 @SpringBootTest
-@Import(OrderPaymentApprovalServiceConcurrencyTest.TestConfig::class)
 class OrderPaymentApprovalServiceConcurrencyTest {
     @Autowired
     private lateinit var orderPaymentApprovalService: OrderPaymentApprovalService
 
     @Autowired
-    private lateinit var testOrderPaymentListener: TestConfig.TestOrderPaymentListener
+    private lateinit var orderRepository: OrderRepository
 
     @Autowired
-    private lateinit var orderCommandService: OrderCommandService
+    private lateinit var orderItemRepository: OrderItemRepository
+
+    @Autowired
+    private lateinit var jdbcTemplate: JdbcTemplate
 
     @MockitoBean
-    private lateinit var orderPaymentApprovalPolicy: OrderPaymentApprovalPolicy
-
-    @Autowired
-    private lateinit var orderQueryRepository: OrderQueryRepository
+    private lateinit var paymentGatewayPort: PaymentGatewayPort
 
     private lateinit var approvalCommand: ApproveOrderPaymentCommand
-
     private lateinit var orderId: String
+    private lateinit var orderEntity: OrderEntity
+    private lateinit var orderItemEntity: OrderItemEntity
 
     @BeforeEach
     fun setUp() {
-        val result = orderCommandService.place(createPlaceOrderCommand())
-        check(result is OrderPlacementResult.Success) {
-            "테스트 주문 생성 실패: $result"
-        }
-        orderId = result.orderId
+        orderId = "order-concurrency-test-1"
         approvalCommand = createApproveOrderPaymentCommand(orderId = orderId)
+        orderEntity =
+            orderRepository.save(
+                createOrderEntity(
+                    orderId = approvalCommand.orderId,
+                    totalAmount = approvalCommand.totalAmount,
+                ),
+            )
+        orderItemEntity =
+            orderItemRepository.save(
+                createOrderItemEntity(
+                    orderEntity = orderEntity,
+                    price = approvalCommand.totalAmount,
+                    quantity = 1,
+                ),
+            )
+    }
 
-        testOrderPaymentListener.clear()
+    @AfterEach
+    fun tearDown() {
+        orderItemRepository.delete(orderItemEntity)
+
+        // deleteById() : OrderEntity @Version 충돌로 인한 OptimisticLockingFailureException 방지를 위함
+        orderRepository.deleteById(
+            requireNotNull(orderEntity.id) {
+                "테스트 데이터 정리에 필요한 orderEntity Id가 없습니다."
+            },
+        )
+        jdbcTemplate.update(
+            "DELETE FROM payments WHERE order_id = ?",
+            approvalCommand.orderId,
+        )
     }
 
     @Test
-    fun `동일한 주문에 대해 동시에 여러 결제 요청을 하는 경우 한 번만 결제되고 다른 요청은 예외를 던진다`() {
+    fun `동일한 주문에 대해 동시 결제 요청을 하는 경우 한 번만 결제되고 다른 요청은 실패 결과를 반환한다`() {
         // given
+        val preOrderVersion = orderRepository.findByOrderId(orderId)?.version ?: 0
+        val paymentGatewayCaptor = argumentCaptor<PaymentApproveCommand>()
         whenever(
-            orderPaymentApprovalPolicy.evaluate(
-                order = any(),
-                totalAmountForPayment = any(),
-            ),
-        ).thenReturn(OrderPaymentEvaluationResult.Success())
+            paymentGatewayPort.approve(any()),
+        ).thenReturn(PaymentApprovalResult.Success(paymentKey = approvalCommand.paymentKey))
 
         // when
-        val preOrderVersion = orderQueryRepository.findByOrderId(orderId)?.version ?: 0
         val results =
             submitConcurrencyTask(
                 task = orderPaymentApprovalService::approve,
@@ -90,20 +117,51 @@ class OrderPaymentApprovalServiceConcurrencyTest {
             )
 
         // then
-        // 결제 이벤트는 한 번만 발행되어야한다.
-        testOrderPaymentListener.eventCount() shouldBe 1
-
-        // 하나의 요청만 성공해야한다.
+        // 하나의 요청만 성공해야 한다.
         val successResults = results.filterIsInstance<TaskResult.Success<OrderPaymentApprovalResult>>()
-        successResults shouldHaveSize 1
+        val paymentSuccessResults = successResults.filter { it.result is OrderPaymentApprovalResult.Success }
+        paymentSuccessResults shouldHaveSize 1
 
-        // 나머지 요청은 실패한다.
-        val failureResults = results.filterIsInstance<TaskResult.Failure>()
-        failureResults shouldHaveSize THREAD_COUNT - successResults.size
-        failureResults.forEach {
-            it.exception.shouldBeInstanceOf<IllegalStateException>()
+        // 동시성 충돌로 인한 예외 (스레드 풀 크기만큼)
+        val concurrencyFailures =
+            results
+                .filterIsInstance<TaskResult.Failure>()
+                .filter { it.exception is OrderAlreadyInProgressException }
+        concurrencyFailures.forEach { failureResult ->
+            failureResult.exception.shouldBeInstanceOf<OrderAlreadyInProgressException>()
+            failureResult.exception.message shouldBe InProgressOrder().message
         }
-        orderQueryRepository.findByOrderId(orderId)?.version shouldBe preOrderVersion + 1
+
+        // 비즈니스 실패 (이미 완료된 주문)
+        val businessFailures =
+            successResults
+                .filter { it.result is OrderPaymentApprovalResult.Failure }
+                .map { it.result as OrderPaymentApprovalResult.Failure }
+                .filter { it.code == OrderPaymentEvaluationResult.CompletedOrder().code }
+
+        // 총합 검증
+        (paymentSuccessResults.size + concurrencyFailures.size + businessFailures.size) shouldBe THREAD_COUNT
+
+        // 결제 프로세스 & 엔티티 검증
+        verify(paymentGatewayPort, times(1)).approve(paymentGatewayCaptor.capture())
+        paymentGatewayCaptor.allValues shouldHaveSize 1
+        paymentGatewayCaptor.allValues.forEach {
+            it.equals(orderPaymentCommand = approvalCommand) shouldBe true
+        }
+
+        val actualPayment =
+            checkNotNull(
+                findPaymentEntityByOrderId(
+                    jdbcTemplate = jdbcTemplate,
+                    orderId = approvalCommand.orderId,
+                ),
+            )
+        actualPayment.status shouldBe PaymentStatus.COMPLETED
+
+        // 주문 엔티티 검증
+        val actualOrder = checkNotNull(orderRepository.findByOrderId(approvalCommand.orderId))
+        actualOrder.version shouldBe preOrderVersion + 2
+        actualOrder.status shouldBe OrderStatus.DONE
     }
 
     private fun <T, R> submitConcurrencyTask(
@@ -151,66 +209,6 @@ class OrderPaymentApprovalServiceConcurrencyTest {
             val threadIndex: Int,
             val exception: Exception,
         ) : TaskResult()
-    }
-
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        fun testOrderPaymentListener(): TestOrderPaymentListener = TestOrderPaymentListener()
-
-        @Primary
-        @Component
-        class DebuggingEventPublisher(
-            @Qualifier("applicationEventPublisher")
-            private val delegate: ApplicationEventPublisher,
-        ) : ApplicationEventPublisher {
-            private val pendingEvents = Collections.synchronizedList(mutableListOf<Any>())
-
-            override fun publishEvent(event: Any) {
-                val threadName = Thread.currentThread().name
-                val txActive = TransactionSynchronizationManager.isSynchronizationActive()
-
-                if (txActive) {
-                    pendingEvents.add(event)
-                    println("[$threadName] ${event::class.simpleName} 이벤트 대기 큐에 추가. 현재 대기 중인 이벤트 수: ${pendingEvents.size}")
-
-                    // 트랜잭션 완료 시 콜백 등록
-                    TransactionSynchronizationManager.registerSynchronization(
-                        object : TransactionSynchronization {
-                            override fun afterCommit() {
-                                pendingEvents.remove(event)
-                                println("[$threadName] 커밋 성공 - 이벤트 처리됨: ${event::class.simpleName} 남은 대기 이벤트 수: ${pendingEvents.size}")
-                            }
-
-                            override fun afterCompletion(status: Int) {
-                                when (status) {
-                                    TransactionSynchronization.STATUS_ROLLED_BACK -> {
-                                        pendingEvents.remove(event)
-                                        println("[$threadName] 롤백 - 이벤트 삭제: ${event::class.simpleName} 남은 대기 이벤트 수: ${pendingEvents.size}")
-                                    }
-                                }
-                            }
-                        },
-                    )
-                }
-
-                delegate.publishEvent(event)
-            }
-        }
-
-        class TestOrderPaymentListener {
-            private val receivedEvents = mutableListOf<OrderPaymentEvent>()
-
-            @TransactionalEventListener
-            fun handle(event: OrderPaymentEvent) {
-                println("이벤트 처리 : ${Thread.currentThread().name}")
-                receivedEvents.add(event)
-            }
-
-            fun clear() = receivedEvents.clear()
-
-            fun eventCount(): Int = receivedEvents.size
-        }
     }
 
     companion object {

@@ -8,8 +8,8 @@ import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
 import com.tangerine.api.order.mapper.toDomain
 import com.tangerine.api.order.mapper.toDomains
 import com.tangerine.api.order.mapper.toEntity
-import com.tangerine.api.order.repository.OrderCommandRepository
-import com.tangerine.api.order.repository.OrderItemCommandRepository
+import com.tangerine.api.order.repository.OrderItemRepository
+import com.tangerine.api.order.repository.OrderRepository
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
@@ -25,10 +25,10 @@ class OrderQueryServiceTest {
     private lateinit var orderQueryService: OrderQueryService
 
     @Autowired
-    private lateinit var orderCommandRepository: OrderCommandRepository
+    private lateinit var orderRepository: OrderRepository
 
     @Autowired
-    private lateinit var orderItemCommandRepository: OrderItemCommandRepository
+    private lateinit var orderItemRepository: OrderItemRepository
 
     private lateinit var newOrder: PlaceOrderCommand
 
@@ -48,8 +48,8 @@ class OrderQueryServiceTest {
     fun `주문 상세 내역 조회 성공 테스트`() {
         // given
         val orderID = TestOrderIdGenerator.STUB_ORDER_ID
-        val orderEntity = orderCommandRepository.save(newOrder.toEntity(orderID))
-        val orderItemEntities = orderItemCommandRepository.saveAll(newOrder.items.toEntities(orderEntity))
+        val orderEntity = orderRepository.save(newOrder.toEntity(orderID))
+        val orderItemEntities = orderItemRepository.saveAll(newOrder.items.toEntities(orderEntity))
         val expectedOrder = orderEntity.toDomain(orderItemEntities.toDomains())
 
         // when

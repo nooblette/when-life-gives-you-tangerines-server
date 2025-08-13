@@ -7,8 +7,8 @@ import com.tangerine.api.order.fixture.domain.createPlaceOrderCommand
 import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
 import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator.Companion.STUB_ORDER_ID
 import com.tangerine.api.order.mapper.toDomain
-import com.tangerine.api.order.repository.OrderItemQueryRepository
-import com.tangerine.api.order.repository.OrderQueryRepository
+import com.tangerine.api.order.repository.OrderItemRepository
+import com.tangerine.api.order.repository.OrderRepository
 import com.tangerine.api.order.result.OrderPlacementResult
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -29,10 +29,10 @@ class OrderCommandServiceTest {
     lateinit var orderCommandService: OrderCommandService
 
     @Autowired
-    lateinit var orderQueryRepository: OrderQueryRepository
+    lateinit var orderRepository: OrderRepository
 
     @Autowired
-    lateinit var orderItemQueryRepository: OrderItemQueryRepository
+    lateinit var orderItemRepository: OrderItemRepository
 
     lateinit var newOrder: PlaceOrderCommand
 
@@ -50,11 +50,11 @@ class OrderCommandServiceTest {
         result.shouldBeInstanceOf<OrderPlacementResult.Success>()
         result.orderId shouldBe STUB_ORDER_ID
 
-        val actualOrder = orderQueryRepository.findByOrderId(result.orderId)
+        val actualOrder = orderRepository.findByOrderId(result.orderId)
         actualOrder shouldNotBe null
         actualOrder?.let {
             assertPlacementOrder(actualOrder)
-            assertPlacementOrderItem(orderItemQueryRepository.findByOrder(actualOrder))
+            assertPlacementOrderItem(orderItemRepository.findByOrder(actualOrder))
         }
     }
 

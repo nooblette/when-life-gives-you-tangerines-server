@@ -16,9 +16,14 @@ sealed class OrderPaymentEvaluationResult(
         open val code: String,
     ) : OrderPaymentEvaluationResult(message = message)
 
-    data class AlreadyInProgressOrder(
-        override val message: String = "이미 결제가 진행 중이거나 완료된 주문입니다.",
+    data class InProgressOrder(
+        override val message: String = "결제 진행 중인 주문입니다.",
         override val code: String = "ALREADY_IN_PROGRESS_ORDER",
+    ) : Failure(message = message, code = code)
+
+    data class CompletedOrder(
+        override val message: String = "완료된 주문입니다.",
+        override val code: String = "COMPLETED_ORDER",
     ) : Failure(message = message, code = code)
 
     data class ExpiredOrder(

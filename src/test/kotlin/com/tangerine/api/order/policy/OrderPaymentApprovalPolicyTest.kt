@@ -34,7 +34,7 @@ class OrderPaymentApprovalPolicyTest {
         val result = approvalPolicy.evaluate(notInitialOrder, notInitialOrder.totalAmount)
 
         // then
-        result.shouldBeInstanceOf<OrderPaymentEvaluationResult.AlreadyInProgressOrder>()
+        result.shouldBeInstanceOf<OrderPaymentEvaluationResult.CompletedOrder>()
     }
 
     @Test

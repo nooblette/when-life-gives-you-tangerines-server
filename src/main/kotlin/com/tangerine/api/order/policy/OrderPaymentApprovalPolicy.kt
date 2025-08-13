@@ -1,6 +1,7 @@
 package com.tangerine.api.order.policy
 
 import com.tangerine.api.common.time.CurrentTimeProvider
+import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.domain.Order
 import com.tangerine.api.order.result.OrderPaymentEvaluationResult
 import org.springframework.stereotype.Component
@@ -14,7 +15,8 @@ class OrderPaymentApprovalPolicy(
         totalAmountForPayment: Int,
     ): OrderPaymentEvaluationResult =
         when {
-            order.isNotInit -> OrderPaymentEvaluationResult.AlreadyInProgressOrder()
+            order.status == OrderStatus.IN_PROGRESS -> OrderPaymentEvaluationResult.InProgressOrder()
+            order.status == OrderStatus.DONE -> OrderPaymentEvaluationResult.CompletedOrder()
             order.isExpired(timeProvider.now()) -> OrderPaymentEvaluationResult.ExpiredOrder()
             order.misMatches(totalAmountForPayment) -> OrderPaymentEvaluationResult.MisMatchedTotalAmount()
             else -> OrderPaymentEvaluationResult.Success()

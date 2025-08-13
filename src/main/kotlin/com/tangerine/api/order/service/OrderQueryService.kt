@@ -3,22 +3,22 @@ package com.tangerine.api.order.service
 import com.tangerine.api.order.domain.Order
 import com.tangerine.api.order.mapper.toDomain
 import com.tangerine.api.order.mapper.toDomains
-import com.tangerine.api.order.repository.OrderItemQueryRepository
-import com.tangerine.api.order.repository.OrderQueryRepository
+import com.tangerine.api.order.repository.OrderItemRepository
+import com.tangerine.api.order.repository.OrderRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class OrderQueryService(
-    private val orderQueryRepository: OrderQueryRepository,
-    private val orderItemQueryRepository: OrderItemQueryRepository,
+    private val orderRepository: OrderRepository,
+    private val orderItemRepository: OrderItemRepository,
 ) {
     @Transactional(readOnly = true)
     fun getOrderById(orderId: String): Order {
-        val order = requireNotNull(orderQueryRepository.findByOrderId(orderId)) { "잘못된 주문 ID 입니다." }
+        val order = requireNotNull(orderRepository.findByOrderId(orderId)) { "잘못된 주문 ID 입니다." }
 
         val orderItems =
-            orderItemQueryRepository
+            orderItemRepository
                 .findByOrder(order)
                 .toDomains()
 
