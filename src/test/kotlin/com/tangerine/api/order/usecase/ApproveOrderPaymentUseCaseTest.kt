@@ -1,4 +1,4 @@
-package com.tangerine.api.order.service
+package com.tangerine.api.order.usecase
 
 import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.entity.OrderEntity
@@ -11,7 +11,7 @@ import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository
 import com.tangerine.api.order.result.OrderPaymentApprovalResult
 import com.tangerine.api.order.result.OrderPaymentEvaluationResult
-import com.tangerine.api.order.service.command.ApproveOrderPaymentCommand
+import com.tangerine.api.order.usecase.command.ApproveOrderPaymentCommand
 import com.tangerine.api.payment.command.PaymentApprovalResult
 import com.tangerine.api.payment.command.PaymentApproveCommand
 import com.tangerine.api.payment.domain.PaymentStatus
@@ -42,9 +42,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.util.concurrent.atomic.AtomicInteger
 
 @SpringBootTest
-class OrderPaymentApprovalServiceTest {
+class ApproveOrderPaymentUseCaseTest {
     @Autowired
-    private lateinit var orderPaymentApprovalService: OrderPaymentApprovalService
+    private lateinit var approveOrderPaymentUseCase: ApproveOrderPaymentUseCase
 
     @Autowired
     private lateinit var orderRepository: OrderRepository
@@ -108,7 +108,7 @@ class OrderPaymentApprovalServiceTest {
     fun `주문 Id에 해당하는 주문 정보가 없으면 예외를 던진다`() {
         // when & then
         shouldThrow<IllegalArgumentException> {
-            orderPaymentApprovalService.approve(
+            approveOrderPaymentUseCase.approve(
                 command = createApproveOrderPaymentCommand(orderId = "invalidOrderId"),
             )
         }
@@ -126,7 +126,7 @@ class OrderPaymentApprovalServiceTest {
         ).thenReturn(evaluationResult)
 
         // when
-        val result = orderPaymentApprovalService.approve(approvalCommand)
+        val result = approveOrderPaymentUseCase.approve(approvalCommand)
 
         // then
         // 반환 값 검증
@@ -167,7 +167,7 @@ class OrderPaymentApprovalServiceTest {
         ).thenReturn(paymentApprovalFailure)
 
         // when
-        val result = orderPaymentApprovalService.approve(approvalCommand)
+        val result = approveOrderPaymentUseCase.approve(approvalCommand)
 
         // then
         // 반환 값 검증
@@ -214,7 +214,7 @@ class OrderPaymentApprovalServiceTest {
         ).thenReturn(PaymentApprovalResult.Success(paymentKey = approvalCommand.paymentKey))
 
         // when
-        val result = orderPaymentApprovalService.approve(approvalCommand)
+        val result = approveOrderPaymentUseCase.approve(approvalCommand)
 
         // then
         result.shouldBeInstanceOf<OrderPaymentApprovalResult.Success>()

@@ -1,4 +1,4 @@
-package com.tangerine.api.order.service
+package com.tangerine.api.order.usecase
 
 import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.exception.OrderAlreadyInProgressException
@@ -9,7 +9,7 @@ import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository
 import com.tangerine.api.order.result.OrderPaymentApprovalResult
 import com.tangerine.api.order.result.OrderPaymentEvaluationResult
-import com.tangerine.api.order.service.command.ApproveOrderPaymentCommand
+import com.tangerine.api.order.usecase.command.ApproveOrderPaymentCommand
 import com.tangerine.api.payment.command.PaymentApprovalResult
 import com.tangerine.api.payment.command.PaymentApproveCommand
 import com.tangerine.api.payment.domain.PaymentStatus
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional
 private val logger = KotlinLogging.logger {}
 
 @Service
-class OrderPaymentApprovalService(
+class ApproveOrderPaymentUseCase(
     private val orderRepository: OrderRepository,
     private val orderItemRepository: OrderItemRepository,
     private val approvalPolicy: OrderPaymentApprovalPolicy,

@@ -1,4 +1,4 @@
-package com.tangerine.api.order.service
+package com.tangerine.api.order.usecase
 
 import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.entity.OrderEntity
@@ -11,8 +11,7 @@ import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository
 import com.tangerine.api.order.result.OrderPaymentApprovalResult
 import com.tangerine.api.order.result.OrderPaymentEvaluationResult
-import com.tangerine.api.order.result.OrderPaymentEvaluationResult.InProgressOrder
-import com.tangerine.api.order.service.command.ApproveOrderPaymentCommand
+import com.tangerine.api.order.usecase.command.ApproveOrderPaymentCommand
 import com.tangerine.api.payment.command.PaymentApprovalResult
 import com.tangerine.api.payment.command.PaymentApproveCommand
 import com.tangerine.api.payment.domain.PaymentStatus
@@ -42,9 +41,9 @@ import java.util.concurrent.TimeUnit
 private val logger = KotlinLogging.logger {}
 
 @SpringBootTest
-class OrderPaymentApprovalServiceConcurrencyTest {
+class ApproveOrderPaymentUseCaseConcurrencyTest {
     @Autowired
-    private lateinit var orderPaymentApprovalService: OrderPaymentApprovalService
+    private lateinit var approveOrderPaymentUseCase: ApproveOrderPaymentUseCase
 
     @Autowired
     private lateinit var orderRepository: OrderRepository
@@ -112,7 +111,7 @@ class OrderPaymentApprovalServiceConcurrencyTest {
         // when
         val results =
             submitConcurrencyTask(
-                task = orderPaymentApprovalService::approve,
+                task = approveOrderPaymentUseCase::approve,
                 request = approvalCommand,
             )
 
@@ -129,7 +128,7 @@ class OrderPaymentApprovalServiceConcurrencyTest {
                 .filter { it.exception is OrderAlreadyInProgressException }
         concurrencyFailures.forEach { failureResult ->
             failureResult.exception.shouldBeInstanceOf<OrderAlreadyInProgressException>()
-            failureResult.exception.message shouldBe InProgressOrder().message
+            failureResult.exception.message shouldBe OrderPaymentEvaluationResult.InProgressOrder().message
         }
 
         // 비즈니스 실패 (이미 완료된 주문)

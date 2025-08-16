@@ -7,7 +7,7 @@ import com.tangerine.api.global.response.toResponseEntity
 import com.tangerine.api.order.api.request.OrderPaymentApprovalRequest
 import com.tangerine.api.order.mapper.toCommand
 import com.tangerine.api.order.result.OrderPaymentApprovalResult
-import com.tangerine.api.order.service.OrderPaymentApprovalService
+import com.tangerine.api.order.usecase.ApproveOrderPaymentUseCase
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
@@ -19,14 +19,14 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/orders")
 class OrderPaymentApprovalController(
-    private val orderPaymentApprovalService: OrderPaymentApprovalService,
+    private val approveOrderPaymentUseCase: ApproveOrderPaymentUseCase,
 ) {
     @PostMapping("/{orderId}/payment-approval")
     fun approve(
         @PathVariable orderId: String,
         @RequestBody @Valid orderPaymentApprovalRequest: OrderPaymentApprovalRequest,
     ): ResponseEntity<out ApiResult<String>> =
-        orderPaymentApprovalService
+        approveOrderPaymentUseCase
             .approve(orderPaymentApprovalRequest.toCommand(orderId = orderId))
             .toApiResult()
             .toResponseEntity()

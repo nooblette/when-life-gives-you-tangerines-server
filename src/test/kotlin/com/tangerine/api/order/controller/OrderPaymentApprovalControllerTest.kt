@@ -4,7 +4,7 @@ import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.order.fixture.builder.JsonOrderPaymentApprovalRequestBuilder
 import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
 import com.tangerine.api.order.result.OrderPaymentApprovalResult
-import com.tangerine.api.order.service.OrderPaymentApprovalService
+import com.tangerine.api.order.usecase.ApproveOrderPaymentUseCase
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -24,7 +24,7 @@ class OrderPaymentApprovalControllerTest {
     lateinit var mockMvc: MockMvc
 
     @MockitoBean
-    lateinit var orderPaymentApprovalService: OrderPaymentApprovalService
+    lateinit var approveOrderPaymentUseCase: ApproveOrderPaymentUseCase
 
     @Test
     fun `주문 결제 요청 본문이 누락되면 400에러를 반환한다`() {
@@ -68,7 +68,7 @@ class OrderPaymentApprovalControllerTest {
                 .withDefaultOrderPaymentApprovalRequest()
                 .build()
         val errorCode = "FAIL"
-        whenever(orderPaymentApprovalService.approve(any()))
+        whenever(approveOrderPaymentUseCase.approve(any()))
             .thenReturn(OrderPaymentApprovalResult.Failure("실패", errorCode))
 
         // when & then
@@ -83,7 +83,7 @@ class OrderPaymentApprovalControllerTest {
             JsonOrderPaymentApprovalRequestBuilder()
                 .withDefaultOrderPaymentApprovalRequest()
                 .build()
-        whenever(orderPaymentApprovalService.approve(any()))
+        whenever(approveOrderPaymentUseCase.approve(any()))
             .thenReturn(OrderPaymentApprovalResult.Success())
 
         // when & then

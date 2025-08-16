@@ -1,6 +1,6 @@
 package com.tangerine.api.payment.fixture.command
 
-import com.tangerine.api.order.service.command.ApproveOrderPaymentCommand
+import com.tangerine.api.order.usecase.command.ApproveOrderPaymentCommand
 import com.tangerine.api.payment.command.PaymentApproveCommand
 
 fun PaymentApproveCommand.equals(orderPaymentCommand: ApproveOrderPaymentCommand) =
