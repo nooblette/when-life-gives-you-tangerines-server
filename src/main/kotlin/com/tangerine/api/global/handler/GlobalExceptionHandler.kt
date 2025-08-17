@@ -38,7 +38,7 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadable(exception: HttpMessageNotReadableException): ResponseEntity<ValidationErrorResponse> {
-        // 내부 원인이 JsonMappingException인 경우만 처리
+        // 내부 원인이 JsonMappingException 예외인 경우만 처리
         // 필수 파라미터 누락으로 코틀린 객체 생성 실패시 발생하는 MissingKotlinParameterException 예외도 JsonMappingException 예외를 상속
         val mappingEx = exception.cause as? JsonMappingException
 

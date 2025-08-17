@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional
 private val logger = KotlinLogging.logger {}
 
 @Service
-@Transactional(readOnly = true)
 class PaymentService(
     private val paymentRepository: PaymentRepository,
     private val paymentGatewayPort: PaymentGatewayPort,
