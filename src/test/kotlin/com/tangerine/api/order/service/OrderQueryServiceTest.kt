@@ -40,7 +40,7 @@ class OrderQueryServiceTest {
     @Test
     fun `요청받은 주문 Id에 해당하는 주문이 없으면 예외를 던진다`() {
         shouldThrow<IllegalArgumentException> {
-            orderQueryService.getOrderById(TestOrderIdGenerator.STUB_ORDER_ID)
+            orderQueryService.getOrderByOrderId(TestOrderIdGenerator.STUB_ORDER_ID)
         }
     }
 
@@ -53,7 +53,7 @@ class OrderQueryServiceTest {
         val expectedOrder = orderEntity.toDomain(orderItemEntities.toDomains())
 
         // when
-        val actualOrder = orderQueryService.getOrderById(orderID)
+        val actualOrder = orderQueryService.getOrderByOrderId(orderID)
 
         // then
         actualOrder shouldBe expectedOrder

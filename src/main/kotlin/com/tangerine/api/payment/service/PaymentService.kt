@@ -1,19 +1,47 @@
 package com.tangerine.api.payment.service
 
+import com.tangerine.api.payment.command.PaymentApprovalResult
 import com.tangerine.api.payment.command.PaymentApproveCommand
 import com.tangerine.api.payment.domain.PaymentStatus
 import com.tangerine.api.payment.entity.PaymentEntity
+import com.tangerine.api.payment.port.PaymentGatewayPort
 import com.tangerine.api.payment.repository.PaymentRepository
+import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+
+private val logger = KotlinLogging.logger {}
 
 @Service
 @Transactional(readOnly = true)
 class PaymentService(
     private val paymentRepository: PaymentRepository,
+    private val paymentGatewayPort: PaymentGatewayPort,
+    private val paymentStateService: PaymentStateService,
 ) {
     @Transactional
-    fun createPreparedPayment(command: PaymentApproveCommand): PaymentEntity =
+    fun approvePayment(command: PaymentApproveCommand): PaymentApprovalResult {
+        logger.info { "결제 요청 시작 : $command" }
+
+        val paymentEntity = createPreparedPayment(command)
+        val paymentResult = paymentGatewayPort.approve(command)
+
+        when (paymentResult) {
+            is PaymentApprovalResult.Success -> {
+                paymentStateService.changeToCompleted(paymentEntity)
+                logger.info { "$command 결제 성공" }
+            }
+
+            is PaymentApprovalResult.Failure -> {
+                paymentStateService.changeToFailed(paymentEntity, paymentResult.message)
+                logger.info { "$command 결제 실패" }
+            }
+        }
+
+        return paymentResult
+    }
+
+    private fun createPreparedPayment(command: PaymentApproveCommand): PaymentEntity =
         paymentRepository.save(
             PaymentEntity(
                 orderId = command.orderId,

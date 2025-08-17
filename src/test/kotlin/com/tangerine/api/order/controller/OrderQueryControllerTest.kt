@@ -33,7 +33,7 @@ class OrderQueryControllerTest {
 
     @Test
     fun `orderId에 해당하는 주문 정보가 없는 경우 400에러를 반환한다`() {
-        whenever(orderQueryService.getOrderById(ORDER_ID))
+        whenever(orderQueryService.getOrderByOrderId(ORDER_ID))
             .thenThrow(IllegalArgumentException::class.java)
 
         performOrderRequest()
@@ -49,7 +49,7 @@ class OrderQueryControllerTest {
     fun `주문 상세 정보 조회 성공 테스트`() {
         // given
         val expectedOrder = createOrder(orderId = ORDER_ID)
-        whenever(orderQueryService.getOrderById(ORDER_ID))
+        whenever(orderQueryService.getOrderByOrderId(ORDER_ID))
             .thenReturn(expectedOrder)
 
         // when

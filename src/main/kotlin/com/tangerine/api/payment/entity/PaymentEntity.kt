@@ -8,6 +8,7 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
 import java.time.LocalDateTime
 
@@ -28,4 +29,11 @@ class PaymentEntity(
     var failReason: String? = null,
     @Column(nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
-)
+    @Column(nullable = false)
+    var updatedAt: LocalDateTime = LocalDateTime.now(),
+) {
+    @PreUpdate
+    fun onUpdate() {
+        this.updatedAt = LocalDateTime.now()
+    }
+}

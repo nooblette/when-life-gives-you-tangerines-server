@@ -1,6 +1,7 @@
 package com.tangerine.api.order.service
 
 import com.tangerine.api.order.domain.Order
+import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.mapper.toDomain
 import com.tangerine.api.order.mapper.toDomains
 import com.tangerine.api.order.repository.OrderItemRepository
@@ -13,15 +14,26 @@ class OrderQueryService(
     private val orderRepository: OrderRepository,
     private val orderItemRepository: OrderItemRepository,
 ) {
+    data class OrderWithEntity(
+        val domain: Order,
+        val entity: OrderEntity,
+    )
+
     @Transactional(readOnly = true)
-    fun getOrderById(orderId: String): Order {
-        val order = requireNotNull(orderRepository.findByOrderId(orderId)) { "잘못된 주문 ID 입니다." }
+    fun getOrderByOrderId(orderId: String): Order = getOrderByOrderIdWithEntity(orderId).domain
 
-        val orderItems =
-            orderItemRepository
-                .findByOrder(order)
-                .toDomains()
+    @Transactional(readOnly = true)
+    fun getOrderByOrderIdWithEntity(orderId: String): OrderWithEntity {
+        val orderEntity =
+            requireNotNull(orderRepository.findByOrderId(orderId)) {
+                "${orderId}에 해당하는 주문 정보가 없습니다."
+            }
 
-        return order.toDomain(items = orderItems)
+        val orderItems = orderItemRepository.findByOrder(orderEntity).toDomains()
+
+        return OrderWithEntity(
+            domain = orderEntity.toDomain(orderItems),
+            entity = orderEntity,
+        )
     }
 }
