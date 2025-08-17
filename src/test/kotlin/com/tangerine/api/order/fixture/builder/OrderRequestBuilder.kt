@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.tangerine.api.order.api.request.CustomerRequest
 import com.tangerine.api.order.api.request.OrderItemRequest
-import com.tangerine.api.order.api.request.OrderRequest
+import com.tangerine.api.order.api.request.PlaceOrderRequest
 
 class OrderRequestBuilder {
     private val objectMapper: ObjectMapper = jacksonObjectMapper()
@@ -34,8 +34,8 @@ class OrderRequestBuilder {
         defaultItems.sumOf { (it.quantity.let { quantity -> it.price.times(quantity) }) }
 
     // 기본 Request 객체
-    private var defaultRequest: OrderRequest =
-        OrderRequest(
+    private var defaultRequest: PlaceOrderRequest =
+        PlaceOrderRequest(
             customer = defaultCustomer,
             items = defaultItems,
             totalAmount = defaultTotalAmount,

@@ -4,7 +4,7 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotEmpty
 
-data class OrderRequest(
+data class PlaceOrderRequest(
     @field:Valid
     val customer: CustomerRequest,
     @field:Valid

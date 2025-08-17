@@ -4,8 +4,8 @@ import com.tangerine.api.global.response.ApiResult
 import com.tangerine.api.global.response.Error
 import com.tangerine.api.global.response.Success
 import com.tangerine.api.global.response.toResponseEntity
-import com.tangerine.api.order.api.request.OrderPaymentApprovalRequest
-import com.tangerine.api.order.mapper.toCommand
+import com.tangerine.api.order.api.request.ApproveOrderPaymentRequest
+import com.tangerine.api.order.mapper.toApproveOrderPaymentCommand
 import com.tangerine.api.order.result.ApproveOrderPaymentResult
 import com.tangerine.api.order.usecase.ApproveOrderPaymentUseCase
 import jakarta.validation.Valid
@@ -24,10 +24,10 @@ class OrderPaymentApprovalController(
     @PostMapping("/{orderId}/payments")
     fun approve(
         @PathVariable orderId: String,
-        @RequestBody @Valid orderPaymentApprovalRequest: OrderPaymentApprovalRequest,
+        @RequestBody @Valid request: ApproveOrderPaymentRequest,
     ): ResponseEntity<out ApiResult<String>> =
         approveOrderPaymentUseCase
-            .approve(orderPaymentApprovalRequest.toCommand(orderId = orderId))
+            .approve(request.toApproveOrderPaymentCommand(orderId = orderId))
             .toApiResult()
             .toResponseEntity()
 

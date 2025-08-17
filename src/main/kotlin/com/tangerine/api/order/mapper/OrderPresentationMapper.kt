@@ -2,7 +2,7 @@ package com.tangerine.api.order.mapper
 
 import com.tangerine.api.order.api.request.CustomerRequest
 import com.tangerine.api.order.api.request.OrderItemRequest
-import com.tangerine.api.order.api.request.OrderRequest
+import com.tangerine.api.order.api.request.PlaceOrderRequest
 import com.tangerine.api.order.api.response.CustomerResponse
 import com.tangerine.api.order.api.response.OrderItemResponse
 import com.tangerine.api.order.api.response.OrderResponse
@@ -11,7 +11,7 @@ import com.tangerine.api.order.domain.Customer
 import com.tangerine.api.order.domain.Order
 import com.tangerine.api.order.domain.OrderItem
 
-fun OrderRequest.toPlaceOrderCommand(): PlaceOrderCommand =
+fun PlaceOrderRequest.toPlaceOrderCommand(): PlaceOrderCommand =
     PlaceOrderCommand(
         customer = customer.toDomain(),
         items = items.map(OrderItemRequest::toDomain),

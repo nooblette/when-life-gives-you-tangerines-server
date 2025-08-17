@@ -1,7 +1,8 @@
 package com.tangerine.api.order.controller
 
-import com.tangerine.api.order.api.request.OrderRequest
+import com.tangerine.api.order.api.request.PlaceOrderRequest
 import com.tangerine.api.order.mapper.toPlaceOrderCommand
+import com.tangerine.api.order.result.PlaceOrderResult
 import com.tangerine.api.order.service.OrderCommandService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.PostMapping
@@ -16,6 +17,6 @@ class OrderCommandController(
 ) {
     @PostMapping
     fun createOrderCommand(
-        @Valid @RequestBody orderRequest: OrderRequest,
-    ) = orderCommandService.place(orderRequest.toPlaceOrderCommand())
+        @Valid @RequestBody request: PlaceOrderRequest,
+    ): PlaceOrderResult = orderCommandService.place(request.toPlaceOrderCommand())
 }
