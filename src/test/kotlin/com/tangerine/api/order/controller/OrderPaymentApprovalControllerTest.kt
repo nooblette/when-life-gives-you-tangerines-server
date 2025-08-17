@@ -1,9 +1,11 @@
 package com.tangerine.api.order.controller
 
 import com.tangerine.api.global.response.ErrorCodes
+import com.tangerine.api.order.exception.OrderAlreadyInProgressException
 import com.tangerine.api.order.fixture.builder.JsonOrderPaymentApprovalRequestBuilder
 import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
 import com.tangerine.api.order.result.OrderPaymentApprovalResult
+import com.tangerine.api.order.result.OrderPaymentEvaluationResult.*
 import com.tangerine.api.order.usecase.ApproveOrderPaymentUseCase
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -17,6 +19,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActionsDsl
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.result.StatusResultMatchersDsl
 
 @WebMvcTest(OrderPaymentApprovalController::class)
 class OrderPaymentApprovalControllerTest {
@@ -35,7 +38,7 @@ class OrderPaymentApprovalControllerTest {
 
         // when & then
         performOrderRequest(requestOrder)
-            .assertResponseCode(ErrorCodes.MISSING_FIELD)
+            .assertErrorResponse(expectedErrorCode = ErrorCodes.MISSING_FIELD)
     }
 
     @ParameterizedTest
@@ -43,7 +46,7 @@ class OrderPaymentApprovalControllerTest {
     fun `필수 파라미터가 누락되면 400에러를 반환한다`(requestOrderPaymentWithoutRequiredParam: String) {
         // when & then
         performOrderRequest(requestOrderPaymentWithoutRequiredParam)
-            .assertResponseCode(ErrorCodes.MISSING_FIELD)
+            .assertErrorResponse(expectedErrorCode = ErrorCodes.MISSING_FIELD)
     }
 
     @Test
@@ -57,7 +60,7 @@ class OrderPaymentApprovalControllerTest {
 
         // when & then
         performOrderRequest(requestOrder)
-            .assertResponseCode(ErrorCodes.INVALID_ARGUMENT)
+            .assertErrorResponse(expectedErrorCode = ErrorCodes.INVALID_ARGUMENT)
     }
 
     @Test
@@ -73,7 +76,25 @@ class OrderPaymentApprovalControllerTest {
 
         // when & then
         performOrderRequest(requestOrder)
-            .assertResponseCode(errorCode)
+            .assertErrorResponse(expectedErrorCode = errorCode)
+    }
+
+    @Test
+    fun `동일한 주문 id에 대해 동시 주문 결제 승인 요청이 발생하는 경우 409에러를 반환한다`() {
+        // given
+        val requestOrder =
+            JsonOrderPaymentApprovalRequestBuilder()
+                .withDefaultOrderPaymentApprovalRequest()
+                .build()
+        whenever(approveOrderPaymentUseCase.approve(any()))
+            .thenThrow(OrderAlreadyInProgressException())
+
+        // when & then
+        performOrderRequest(requestOrder)
+            .assertErrorResponse(
+                expectedStatus = { isConflict() },
+                expectedErrorCode = InProgressOrder().code,
+            )
     }
 
     @Test
@@ -100,13 +121,17 @@ class OrderPaymentApprovalControllerTest {
         }
 
     // 응답 및 에러 코드 검증
-    private fun ResultActionsDsl.assertResponseCode(errorCode: String) {
+    private fun ResultActionsDsl.assertErrorResponse(
+        expectedStatus: StatusResultMatchersDsl.() -> Unit = { isBadRequest() },
+        expectedErrorCode: String,
+    ) {
         this
             .andDo {
-                print() // 요청/응답 전체를 콘솔에 출력
+                // 요청/응답 전체를 콘솔에 출력
+                print()
             }.andExpect {
-                status { isBadRequest() }
-                jsonPath("$.code") { value(errorCode) }
+                status(expectedStatus)
+                jsonPath("$.code") { value(expectedErrorCode) }
             }
     }
 
