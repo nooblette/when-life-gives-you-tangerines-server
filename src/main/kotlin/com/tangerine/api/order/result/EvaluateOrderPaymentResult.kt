@@ -1,20 +1,16 @@
 package com.tangerine.api.order.result
 
-sealed class OrderPaymentEvaluationResult(
+sealed class EvaluateOrderPaymentResult(
     open val message: String,
-    open val isSuccess: Boolean = false,
-    open val isFailure: Boolean = false,
 ) {
     data class Success(
         override val message: String = "Ok",
-        override val isSuccess: Boolean = true,
-    ) : OrderPaymentEvaluationResult(message = message)
+    ) : EvaluateOrderPaymentResult(message = message)
 
     open class Failure(
         override val message: String,
-        override val isFailure: Boolean = true,
         open val code: String,
-    ) : OrderPaymentEvaluationResult(message = message)
+    ) : EvaluateOrderPaymentResult(message = message)
 
     data class InProgressOrder(
         override val message: String = "결제 진행 중인 주문입니다.",

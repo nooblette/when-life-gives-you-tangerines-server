@@ -6,7 +6,7 @@ import com.tangerine.api.global.response.Success
 import com.tangerine.api.global.response.toResponseEntity
 import com.tangerine.api.order.api.request.OrderPaymentApprovalRequest
 import com.tangerine.api.order.mapper.toCommand
-import com.tangerine.api.order.result.OrderPaymentApprovalResult
+import com.tangerine.api.order.result.ApproveOrderPaymentResult
 import com.tangerine.api.order.usecase.ApproveOrderPaymentUseCase
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -31,9 +31,9 @@ class OrderPaymentApprovalController(
             .toApiResult()
             .toResponseEntity()
 
-    private fun OrderPaymentApprovalResult.toApiResult(): ApiResult<String> =
+    private fun ApproveOrderPaymentResult.toApiResult(): ApiResult<String> =
         when (this) {
-            is OrderPaymentApprovalResult.Failure -> Error(message = this.message, code = this.code)
-            is OrderPaymentApprovalResult.Success -> Success(data = this.message)
+            is ApproveOrderPaymentResult.Failure -> Error(message = this.message, code = this.code)
+            is ApproveOrderPaymentResult.Success -> Success(data = this.message)
         }
 }

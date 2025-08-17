@@ -1,7 +1,7 @@
 package com.tangerine.api.order.mapper
 
 import com.tangerine.api.order.api.request.OrderPaymentApprovalRequest
-import com.tangerine.api.order.usecase.command.ApproveOrderPaymentCommand
+import com.tangerine.api.order.command.ApproveOrderPaymentCommand
 
 fun OrderPaymentApprovalRequest.toCommand(orderId: String) =
     ApproveOrderPaymentCommand(

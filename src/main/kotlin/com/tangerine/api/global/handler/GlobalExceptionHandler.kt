@@ -6,7 +6,7 @@ import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.global.response.ValidationError
 import com.tangerine.api.global.response.ValidationErrorResponse
 import com.tangerine.api.order.exception.OrderAlreadyInProgressException
-import com.tangerine.api.order.result.OrderPaymentEvaluationResult.InProgressOrder
+import com.tangerine.api.order.result.EvaluateOrderPaymentResult.InProgressOrder
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException

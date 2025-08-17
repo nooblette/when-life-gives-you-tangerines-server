@@ -1,11 +1,11 @@
 package com.tangerine.api.payment.service
 
-import com.tangerine.api.payment.command.PaymentApprovalResult
-import com.tangerine.api.payment.command.PaymentApproveCommand
+import com.tangerine.api.payment.command.ApprovePaymentCommand
 import com.tangerine.api.payment.domain.PaymentStatus
 import com.tangerine.api.payment.entity.PaymentEntity
 import com.tangerine.api.payment.port.PaymentGatewayPort
 import com.tangerine.api.payment.repository.PaymentRepository
+import com.tangerine.api.payment.result.ApprovePaymentResult
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,19 +20,19 @@ class PaymentService(
     private val paymentStateService: PaymentStateService,
 ) {
     @Transactional
-    fun approvePayment(command: PaymentApproveCommand): PaymentApprovalResult {
+    fun approvePayment(command: ApprovePaymentCommand): ApprovePaymentResult {
         logger.info { "결제 요청 시작 : $command" }
 
         val paymentEntity = createPreparedPayment(command)
         val paymentResult = paymentGatewayPort.approve(command)
 
         when (paymentResult) {
-            is PaymentApprovalResult.Success -> {
+            is ApprovePaymentResult.Success -> {
                 paymentStateService.changeToCompleted(paymentEntity)
                 logger.info { "$command 결제 성공" }
             }
 
-            is PaymentApprovalResult.Failure -> {
+            is ApprovePaymentResult.Failure -> {
                 paymentStateService.changeToFailed(paymentEntity, paymentResult.message)
                 logger.info { "$command 결제 실패" }
             }
@@ -41,7 +41,7 @@ class PaymentService(
         return paymentResult
     }
 
-    private fun createPreparedPayment(command: PaymentApproveCommand): PaymentEntity =
+    private fun createPreparedPayment(command: ApprovePaymentCommand): PaymentEntity =
         paymentRepository.save(
             PaymentEntity(
                 orderId = command.orderId,

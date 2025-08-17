@@ -1,5 +1,6 @@
 package com.tangerine.api.order.service
 
+import com.tangerine.api.order.command.PlaceOrderCommand
 import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity
@@ -8,7 +9,7 @@ import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
 import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator.Companion.STUB_ORDER_ID
 import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository
-import com.tangerine.api.order.result.OrderPlacementResult
+import com.tangerine.api.order.result.PlaceOrderResult
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -46,7 +47,7 @@ class OrderCommandServiceTest {
         val result = orderCommandService.place(newOrder)
 
         // then
-        result.shouldBeInstanceOf<OrderPlacementResult.Success>()
+        result.shouldBeInstanceOf<PlaceOrderResult.Success>()
         result.orderId shouldBe STUB_ORDER_ID
 
         val actualOrder = orderRepository.findByOrderId(result.orderId)

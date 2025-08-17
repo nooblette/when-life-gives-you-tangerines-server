@@ -1,5 +1,6 @@
 package com.tangerine.api.order.usecase
 
+import com.tangerine.api.order.command.ApproveOrderPaymentCommand
 import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity
@@ -9,15 +10,14 @@ import com.tangerine.api.order.fixture.entity.createOrderEntity
 import com.tangerine.api.order.fixture.entity.createOrderItemEntity
 import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository
-import com.tangerine.api.order.result.OrderPaymentApprovalResult
-import com.tangerine.api.order.result.OrderPaymentEvaluationResult
-import com.tangerine.api.order.usecase.command.ApproveOrderPaymentCommand
-import com.tangerine.api.payment.command.PaymentApprovalResult
-import com.tangerine.api.payment.command.PaymentApproveCommand
+import com.tangerine.api.order.result.ApproveOrderPaymentResult
+import com.tangerine.api.order.result.EvaluateOrderPaymentResult
+import com.tangerine.api.payment.command.ApprovePaymentCommand
 import com.tangerine.api.payment.domain.PaymentStatus
 import com.tangerine.api.payment.fixture.command.equals
 import com.tangerine.api.payment.fixture.entity.findPaymentEntityByOrderId
 import com.tangerine.api.payment.port.PaymentGatewayPort
+import com.tangerine.api.payment.result.ApprovePaymentResult
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -103,10 +103,10 @@ class ApproveOrderPaymentUseCaseConcurrencyTest {
     fun `동일한 주문에 대해 동시 결제 요청을 하는 경우 한 번만 결제되고 다른 요청은 실패 결과를 반환한다`() {
         // given
         val preOrderVersion = orderRepository.findByOrderId(orderId)?.version ?: 0
-        val paymentGatewayCaptor = argumentCaptor<PaymentApproveCommand>()
+        val paymentGatewayCaptor = argumentCaptor<ApprovePaymentCommand>()
         whenever(
             paymentGatewayPort.approve(any()),
-        ).thenReturn(PaymentApprovalResult.Success(paymentKey = approvalCommand.paymentKey))
+        ).thenReturn(ApprovePaymentResult.Success(paymentKey = approvalCommand.paymentKey))
 
         // when
         val results =
@@ -117,8 +117,8 @@ class ApproveOrderPaymentUseCaseConcurrencyTest {
 
         // then
         // 하나의 요청만 성공해야 한다.
-        val successResults = results.filterIsInstance<TaskResult.Success<OrderPaymentApprovalResult>>()
-        val paymentSuccessResults = successResults.filter { it.result is OrderPaymentApprovalResult.Success }
+        val successResults = results.filterIsInstance<TaskResult.Success<ApproveOrderPaymentResult>>()
+        val paymentSuccessResults = successResults.filter { it.result is ApproveOrderPaymentResult.Success }
         paymentSuccessResults shouldHaveSize 1
 
         // 동시성 충돌로 인한 예외 (스레드 풀 크기만큼)
@@ -128,15 +128,15 @@ class ApproveOrderPaymentUseCaseConcurrencyTest {
                 .filter { it.exception is OrderAlreadyInProgressException }
         concurrencyFailures.forEach { failureResult ->
             failureResult.exception.shouldBeInstanceOf<OrderAlreadyInProgressException>()
-            failureResult.exception.message shouldBe OrderPaymentEvaluationResult.InProgressOrder().message
+            failureResult.exception.message shouldBe EvaluateOrderPaymentResult.InProgressOrder().message
         }
 
         // 비즈니스 실패 (이미 완료된 주문)
         val businessFailures =
             successResults
-                .filter { it.result is OrderPaymentApprovalResult.Failure }
-                .map { it.result as OrderPaymentApprovalResult.Failure }
-                .filter { it.code == OrderPaymentEvaluationResult.CompletedOrder().code }
+                .filter { it.result is ApproveOrderPaymentResult.Failure }
+                .map { it.result as ApproveOrderPaymentResult.Failure }
+                .filter { it.code == EvaluateOrderPaymentResult.CompletedOrder().code }
 
         // 총합 검증
         (paymentSuccessResults.size + concurrencyFailures.size + businessFailures.size) shouldBe THREAD_COUNT

@@ -4,8 +4,8 @@ import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.order.exception.OrderAlreadyInProgressException
 import com.tangerine.api.order.fixture.builder.JsonOrderPaymentApprovalRequestBuilder
 import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
-import com.tangerine.api.order.result.OrderPaymentApprovalResult
-import com.tangerine.api.order.result.OrderPaymentEvaluationResult.*
+import com.tangerine.api.order.result.ApproveOrderPaymentResult
+import com.tangerine.api.order.result.EvaluateOrderPaymentResult
 import com.tangerine.api.order.usecase.ApproveOrderPaymentUseCase
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -72,7 +72,7 @@ class OrderPaymentApprovalControllerTest {
                 .build()
         val errorCode = "FAIL"
         whenever(approveOrderPaymentUseCase.approve(any()))
-            .thenReturn(OrderPaymentApprovalResult.Failure("실패", errorCode))
+            .thenReturn(ApproveOrderPaymentResult.Failure("실패", errorCode))
 
         // when & then
         performOrderRequest(requestOrder)
@@ -93,7 +93,7 @@ class OrderPaymentApprovalControllerTest {
         performOrderRequest(requestOrder)
             .assertErrorResponse(
                 expectedStatus = { isConflict() },
-                expectedErrorCode = InProgressOrder().code,
+                expectedErrorCode = EvaluateOrderPaymentResult.InProgressOrder().code,
             )
     }
 
@@ -105,7 +105,7 @@ class OrderPaymentApprovalControllerTest {
                 .withDefaultOrderPaymentApprovalRequest()
                 .build()
         whenever(approveOrderPaymentUseCase.approve(any()))
-            .thenReturn(OrderPaymentApprovalResult.Success())
+            .thenReturn(ApproveOrderPaymentResult.Success())
 
         // when & then
         performOrderRequest(requestOrder)

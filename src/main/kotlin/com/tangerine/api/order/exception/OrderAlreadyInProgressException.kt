@@ -1,5 +1,5 @@
 package com.tangerine.api.order.exception
 
-import com.tangerine.api.order.result.OrderPaymentEvaluationResult.InProgressOrder
+import com.tangerine.api.order.result.EvaluateOrderPaymentResult.InProgressOrder
 
 class OrderAlreadyInProgressException : RuntimeException(InProgressOrder().message)

@@ -1,6 +1,6 @@
 package com.tangerine.api.order.fixture.domain
 
-import com.tangerine.api.order.service.PlaceOrderCommand
+import com.tangerine.api.order.command.PlaceOrderCommand
 
 fun createPlaceOrderCommand(): PlaceOrderCommand {
     val testOrderItems = createOrderItems()

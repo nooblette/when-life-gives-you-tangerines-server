@@ -1,5 +1,6 @@
 package com.tangerine.api.order.service
 
+import com.tangerine.api.order.command.PlaceOrderCommand
 import com.tangerine.api.order.domain.OrderItem
 import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity

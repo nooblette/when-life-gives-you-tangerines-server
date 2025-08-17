@@ -7,7 +7,7 @@ import com.tangerine.api.order.fixture.domain.OrderDomainFixture.createExpiredOr
 import com.tangerine.api.order.fixture.domain.OrderDomainFixture.createExpiredOrderByStatus
 import com.tangerine.api.order.fixture.domain.OrderDomainFixture.createInProgressOrder
 import com.tangerine.api.order.fixture.domain.OrderDomainFixture.createOrder
-import com.tangerine.api.order.result.OrderPaymentEvaluationResult
+import com.tangerine.api.order.result.EvaluateOrderPaymentResult
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
@@ -35,7 +35,7 @@ class OrderPaymentApprovalPolicyTest {
     @MethodSource("createNotInitialOrders")
     fun `주문 상태가 초기가 아닌 경우 실패를 반환한다`(
         notInitialOrder: Order,
-        expectedResultClass: KClass<out OrderPaymentEvaluationResult>,
+        expectedResultClass: KClass<out EvaluateOrderPaymentResult>,
     ) {
         // when
         val result = approvalPolicy.evaluate(notInitialOrder, notInitialOrder.totalAmount)
@@ -56,7 +56,7 @@ class OrderPaymentApprovalPolicyTest {
         val result = approvalPolicy.evaluate(doneOrder, misMatchedTotalAmount)
 
         // then
-        result.shouldBeInstanceOf<OrderPaymentEvaluationResult.MisMatchedTotalAmount>()
+        result.shouldBeInstanceOf<EvaluateOrderPaymentResult.MisMatchedTotalAmount>()
     }
 
     @Test
@@ -73,7 +73,7 @@ class OrderPaymentApprovalPolicyTest {
         val result = approvalPolicy.evaluate(expiredOrder, expiredOrder.totalAmount)
 
         // then
-        result.shouldBeInstanceOf<OrderPaymentEvaluationResult.ExpiredOrder>()
+        result.shouldBeInstanceOf<EvaluateOrderPaymentResult.ExpiredOrder>()
     }
 
     @Test
@@ -87,16 +87,16 @@ class OrderPaymentApprovalPolicyTest {
         val result = approvalPolicy.evaluate(order, order.totalAmount)
 
         // then
-        result.shouldBeInstanceOf<OrderPaymentEvaluationResult.Success>()
+        result.shouldBeInstanceOf<EvaluateOrderPaymentResult.Success>()
     }
 
     companion object {
         @JvmStatic
         fun createNotInitialOrders(): Stream<Arguments> =
             Stream.of(
-                Arguments.of(createDoneOrder(), OrderPaymentEvaluationResult.CompletedOrder::class),
-                Arguments.of(createInProgressOrder(), OrderPaymentEvaluationResult.InProgressOrder::class),
-                Arguments.of(createExpiredOrderByStatus(), OrderPaymentEvaluationResult.ExpiredOrder::class),
+                Arguments.of(createDoneOrder(), EvaluateOrderPaymentResult.CompletedOrder::class),
+                Arguments.of(createInProgressOrder(), EvaluateOrderPaymentResult.InProgressOrder::class),
+                Arguments.of(createExpiredOrderByStatus(), EvaluateOrderPaymentResult.ExpiredOrder::class),
             )
     }
 }

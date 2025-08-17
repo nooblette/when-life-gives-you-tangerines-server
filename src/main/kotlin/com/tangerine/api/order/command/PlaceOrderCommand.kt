@@ -1,4 +1,4 @@
-package com.tangerine.api.order.service
+package com.tangerine.api.order.command
 
 import com.tangerine.api.order.domain.Customer
 import com.tangerine.api.order.domain.OrderItem

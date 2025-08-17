@@ -4,7 +4,7 @@ import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.order.fixture.builder.JsonOrderRequestBuilder
 import com.tangerine.api.order.fixture.builder.OrderRequestBuilder
 import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
-import com.tangerine.api.order.result.OrderPlacementResult
+import com.tangerine.api.order.result.PlaceOrderResult
 import com.tangerine.api.order.service.OrderCommandService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -152,7 +152,7 @@ class OrderCommandControllerTest {
         // given
         val orderId = TestOrderIdGenerator.STUB_ORDER_ID
         whenever(orderCommandService.place(any()))
-            .thenReturn(OrderPlacementResult.Success(orderId))
+            .thenReturn(PlaceOrderResult.Success(orderId))
 
         // when
         val requestOrder =

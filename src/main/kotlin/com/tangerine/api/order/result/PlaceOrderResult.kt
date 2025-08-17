@@ -1,11 +1,11 @@
 package com.tangerine.api.order.result
 
-sealed class OrderPlacementResult {
+sealed interface PlaceOrderResult {
     data class Success(
         val orderId: String,
-    ) : OrderPlacementResult()
+    ) : PlaceOrderResult
 
     data class Failure(
         val reason: String,
-    ) : OrderPlacementResult()
+    ) : PlaceOrderResult
 }

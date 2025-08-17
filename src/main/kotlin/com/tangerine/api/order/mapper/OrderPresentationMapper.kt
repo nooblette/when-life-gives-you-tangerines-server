@@ -6,10 +6,10 @@ import com.tangerine.api.order.api.request.OrderRequest
 import com.tangerine.api.order.api.response.CustomerResponse
 import com.tangerine.api.order.api.response.OrderItemResponse
 import com.tangerine.api.order.api.response.OrderResponse
+import com.tangerine.api.order.command.PlaceOrderCommand
 import com.tangerine.api.order.domain.Customer
 import com.tangerine.api.order.domain.Order
 import com.tangerine.api.order.domain.OrderItem
-import com.tangerine.api.order.service.PlaceOrderCommand
 
 fun OrderRequest.toPlaceOrderCommand(): PlaceOrderCommand =
     PlaceOrderCommand(

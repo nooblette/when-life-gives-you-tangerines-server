@@ -1,5 +1,6 @@
 package com.tangerine.api.order.usecase
 
+import com.tangerine.api.order.command.ApproveOrderPaymentCommand
 import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity
@@ -9,16 +10,15 @@ import com.tangerine.api.order.fixture.entity.createOrderItemEntity
 import com.tangerine.api.order.policy.OrderPaymentApprovalPolicy
 import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository
-import com.tangerine.api.order.result.OrderPaymentApprovalResult
-import com.tangerine.api.order.result.OrderPaymentEvaluationResult
-import com.tangerine.api.order.usecase.command.ApproveOrderPaymentCommand
-import com.tangerine.api.payment.command.PaymentApprovalResult
-import com.tangerine.api.payment.command.PaymentApproveCommand
+import com.tangerine.api.order.result.ApproveOrderPaymentResult
+import com.tangerine.api.order.result.EvaluateOrderPaymentResult
+import com.tangerine.api.payment.command.ApprovePaymentCommand
 import com.tangerine.api.payment.domain.PaymentStatus
 import com.tangerine.api.payment.fixture.command.equals
 import com.tangerine.api.payment.fixture.entity.countPaymentEntitiesByOrderId
 import com.tangerine.api.payment.fixture.entity.findPaymentEntityByOrderId
 import com.tangerine.api.payment.port.PaymentGatewayPort
+import com.tangerine.api.payment.result.ApprovePaymentResult
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -116,7 +116,7 @@ class ApproveOrderPaymentUseCaseTest {
 
     @ParameterizedTest
     @MethodSource("failureTestCases")
-    fun `주문 승인 정책에 위반된 경우 주문 결제 승인 실패를 반환한다`(evaluationResult: OrderPaymentEvaluationResult.Failure) {
+    fun `주문 승인 정책에 위반된 경우 주문 결제 승인 실패를 반환한다`(evaluationResult: EvaluateOrderPaymentResult.Failure) {
         // given
         whenever(
             orderPaymentApprovalPolicy.evaluate(
@@ -130,7 +130,7 @@ class ApproveOrderPaymentUseCaseTest {
 
         // then
         // 반환 값 검증
-        result.shouldBeInstanceOf<OrderPaymentApprovalResult.Failure>()
+        result.shouldBeInstanceOf<ApproveOrderPaymentResult.Failure>()
         result.code shouldBe evaluationResult.code
         result.message shouldBe evaluationResult.message
 
@@ -154,10 +154,10 @@ class ApproveOrderPaymentUseCaseTest {
                 order = any(),
                 totalAmountForPayment = any(),
             ),
-        ).thenReturn(OrderPaymentEvaluationResult.Success())
+        ).thenReturn(EvaluateOrderPaymentResult.Success())
 
         val paymentApprovalFailure =
-            PaymentApprovalResult.Failure(
+            ApprovePaymentResult.Failure(
                 paymentKey = approvalCommand.paymentKey,
                 message = "정지된 카드 입니다.",
                 code = "INVALID_STOPPED_CARD",
@@ -171,12 +171,12 @@ class ApproveOrderPaymentUseCaseTest {
 
         // then
         // 반환 값 검증
-        result.shouldBeInstanceOf<OrderPaymentApprovalResult.Failure>()
+        result.shouldBeInstanceOf<ApproveOrderPaymentResult.Failure>()
         result.code shouldBe paymentApprovalFailure.code
         result.message shouldBe paymentApprovalFailure.message
 
         // 결제 프로세스 & 엔티티 검증
-        val paymentGatewayCaptor = argumentCaptor<PaymentApproveCommand>()
+        val paymentGatewayCaptor = argumentCaptor<ApprovePaymentCommand>()
         verify(paymentGatewayPort, times(1)).approve(paymentGatewayCaptor.capture())
         paymentGatewayCaptor.allValues shouldHaveSize 1
         paymentGatewayCaptor.allValues.forEach {
@@ -206,18 +206,18 @@ class ApproveOrderPaymentUseCaseTest {
                 order = any(),
                 totalAmountForPayment = any(),
             ),
-        ).thenReturn(OrderPaymentEvaluationResult.Success())
+        ).thenReturn(EvaluateOrderPaymentResult.Success())
 
-        val paymentGatewayCaptor = argumentCaptor<PaymentApproveCommand>()
+        val paymentGatewayCaptor = argumentCaptor<ApprovePaymentCommand>()
         whenever(
             paymentGatewayPort.approve(any()),
-        ).thenReturn(PaymentApprovalResult.Success(paymentKey = approvalCommand.paymentKey))
+        ).thenReturn(ApprovePaymentResult.Success(paymentKey = approvalCommand.paymentKey))
 
         // when
         val result = approveOrderPaymentUseCase.approve(approvalCommand)
 
         // then
-        result.shouldBeInstanceOf<OrderPaymentApprovalResult.Success>()
+        result.shouldBeInstanceOf<ApproveOrderPaymentResult.Success>()
 
         // 결제 프로세스 & 엔티티 검증
         verify(paymentGatewayPort, times(1)).approve(paymentGatewayCaptor.capture())
@@ -244,10 +244,10 @@ class ApproveOrderPaymentUseCaseTest {
         @JvmStatic
         fun failureTestCases() =
             listOf(
-                Arguments.of(OrderPaymentEvaluationResult.CompletedOrder()),
-                Arguments.of(OrderPaymentEvaluationResult.ExpiredOrder()),
-                Arguments.of(OrderPaymentEvaluationResult.MisMatchedTotalAmount()),
-                Arguments.of(OrderPaymentEvaluationResult.MisMatchedTotalAmount()),
+                Arguments.of(EvaluateOrderPaymentResult.CompletedOrder()),
+                Arguments.of(EvaluateOrderPaymentResult.ExpiredOrder()),
+                Arguments.of(EvaluateOrderPaymentResult.MisMatchedTotalAmount()),
+                Arguments.of(EvaluateOrderPaymentResult.MisMatchedTotalAmount()),
             )
 
         private val orderIdCounter = AtomicInteger()

@@ -1,4 +1,4 @@
-package com.tangerine.api.order.usecase.command
+package com.tangerine.api.order.command
 
 data class ApproveOrderPaymentCommand(
     val orderId: String,
