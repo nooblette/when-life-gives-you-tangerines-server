@@ -90,7 +90,7 @@ class OrderQueryControllerTest {
     }
 
     companion object {
-        const val ORDER_URL = "/order/{orderId}"
+        const val ORDER_URL = "/orders/{orderId}"
         const val ORDER_ID = STUB_ORDER_ID
     }
 }

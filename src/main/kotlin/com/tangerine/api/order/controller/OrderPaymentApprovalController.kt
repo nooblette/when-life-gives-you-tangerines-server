@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 class OrderPaymentApprovalController(
     private val approveOrderPaymentUseCase: ApproveOrderPaymentUseCase,
 ) {
-    @PostMapping("/{orderId}/payment-approval")
+    @PostMapping("/{orderId}/payments")
     fun approve(
         @PathVariable orderId: String,
         @RequestBody @Valid orderPaymentApprovalRequest: OrderPaymentApprovalRequest,

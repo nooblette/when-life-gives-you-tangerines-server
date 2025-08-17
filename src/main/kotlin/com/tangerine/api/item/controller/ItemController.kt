@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping
-class ItemQueryController(
+@RequestMapping("/items")
+class ItemController(
     private val itemQueryService: ItemQueryService,
 ) {
-    @GetMapping("/items")
+    @GetMapping
     fun findAll(): ItemResponses = ItemResponses(itemQueryService.findAll().toResponses())
 }

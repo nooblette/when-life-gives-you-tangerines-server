@@ -191,6 +191,6 @@ class OrderCommandControllerTest {
     }
 
     companion object {
-        const val ORDER_URL = "/order"
+        const val ORDER_URL = "/orders"
     }
 }

@@ -136,7 +136,7 @@ class OrderPaymentApprovalControllerTest {
     }
 
     companion object {
-        const val ORDER_PAYMENT_APPROVAL_URL = "/orders/" + TestOrderIdGenerator.STUB_ORDER_ID + "/payment-approval"
+        const val ORDER_PAYMENT_APPROVAL_URL = "/orders/" + TestOrderIdGenerator.STUB_ORDER_ID + "/payments"
 
         @JvmStatic
         fun createOrderPaymentRequestsWithoutRequiredParameter(): List<String> {
