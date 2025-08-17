@@ -6,7 +6,6 @@ import com.tangerine.api.order.entity.OrderItemEntity
 import com.tangerine.api.order.fixture.domain.createPlaceOrderCommand
 import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
 import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator.Companion.STUB_ORDER_ID
-import com.tangerine.api.order.mapper.toDomain
 import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository
 import com.tangerine.api.order.result.OrderPlacementResult
@@ -72,6 +71,15 @@ class OrderCommandServiceTest {
     private fun assertPlacementOrderItem(actualOrderItem: List<OrderItemEntity>) {
         actualOrderItem shouldNotBe null
         actualOrderItem shouldHaveSize newOrder.items.size
-        actualOrderItem.map(OrderItemEntity::toDomain) shouldBe newOrder.items
+
+        // 테스트 실행 순서에 따라 orderItemEntity의 Id 값이 달라져 테스트 격리 원칙에 위배
+        // Id 생성은 Jpa의 책임이므로 비즈니스 로직에서 검증하지 않는다.
+        actualOrderItem.forEachIndexed { index, orderItemEntity ->
+            val expectedItem = newOrder.items[index]
+            orderItemEntity.itemId shouldBe expectedItem.id
+            orderItemEntity.name shouldBe expectedItem.name
+            orderItemEntity.price shouldBe expectedItem.price
+            orderItemEntity.quantity shouldBe expectedItem.quantity
+        }
     }
 }
