@@ -5,4 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface ItemQueryRepository : JpaRepository<ItemEntity, Long?>
+interface ItemRepository : JpaRepository<ItemEntity, Long?>
