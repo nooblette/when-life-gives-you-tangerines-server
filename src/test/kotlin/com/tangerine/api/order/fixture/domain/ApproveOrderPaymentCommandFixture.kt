@@ -1,7 +1,7 @@
 package com.tangerine.api.order.fixture.domain
 
 import com.tangerine.api.order.command.ApproveOrderPaymentCommand
-import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
+import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator
 
 fun createApproveOrderPaymentCommand(
     orderId: String = TestOrderIdGenerator.STUB_ORDER_ID,

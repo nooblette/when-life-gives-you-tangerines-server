@@ -3,7 +3,7 @@ package com.tangerine.api.order.fixture.domain
 import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.domain.Order
 import com.tangerine.api.order.domain.OrderItem
-import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator.Companion.STUB_ORDER_ID
+import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator.Companion.STUB_ORDER_ID
 import java.time.LocalDateTime
 import java.util.concurrent.atomic.AtomicLong
 

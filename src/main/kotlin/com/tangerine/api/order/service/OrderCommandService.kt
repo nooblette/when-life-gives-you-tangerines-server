@@ -1,7 +1,7 @@
 package com.tangerine.api.order.service
 
 import com.tangerine.api.order.command.PlaceOrderCommand
-import com.tangerine.api.order.domain.OrderIdGenerator
+import com.tangerine.api.order.domain.generator.OrderIdGenerator
 import com.tangerine.api.order.mapper.toEntity
 import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository

@@ -1,6 +1,6 @@
-package com.tangerine.api.order.fixture.generator
+package com.tangerine.api.order.fixture.domain.generator
 
-import com.tangerine.api.order.domain.OrderIdGenerator
+import com.tangerine.api.order.domain.generator.OrderIdGenerator
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary

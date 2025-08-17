@@ -1,4 +1,4 @@
-package com.tangerine.api.order.domain
+package com.tangerine.api.order.domain.generator
 
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime

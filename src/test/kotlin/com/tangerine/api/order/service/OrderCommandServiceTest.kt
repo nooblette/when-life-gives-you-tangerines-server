@@ -5,8 +5,8 @@ import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity
 import com.tangerine.api.order.fixture.domain.createPlaceOrderCommand
-import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
-import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator.Companion.STUB_ORDER_ID
+import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator
+import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator.Companion.STUB_ORDER_ID
 import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository
 import com.tangerine.api.order.result.PlaceOrderResult

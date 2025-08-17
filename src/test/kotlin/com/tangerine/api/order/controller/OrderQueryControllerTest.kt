@@ -6,7 +6,7 @@ import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.order.domain.Customer
 import com.tangerine.api.order.domain.OrderItem
 import com.tangerine.api.order.fixture.domain.OrderDomainFixture.createOrder
-import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator.Companion.STUB_ORDER_ID
+import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator.Companion.STUB_ORDER_ID
 import com.tangerine.api.order.service.OrderQueryService
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test

@@ -3,7 +3,7 @@ package com.tangerine.api.order.controller
 import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.order.exception.OrderAlreadyInProgressException
 import com.tangerine.api.order.fixture.builder.JsonOrderPaymentApprovalRequestBuilder
-import com.tangerine.api.order.fixture.generator.TestOrderIdGenerator
+import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator
 import com.tangerine.api.order.result.ApproveOrderPaymentResult
 import com.tangerine.api.order.result.EvaluateOrderPaymentResult
 import com.tangerine.api.order.usecase.ApproveOrderPaymentUseCase
