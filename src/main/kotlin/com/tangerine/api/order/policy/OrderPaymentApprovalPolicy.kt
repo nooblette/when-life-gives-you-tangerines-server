@@ -17,8 +17,10 @@ class OrderPaymentApprovalPolicy(
         when {
             order.status == OrderStatus.IN_PROGRESS -> OrderPaymentEvaluationResult.InProgressOrder()
             order.status == OrderStatus.DONE -> OrderPaymentEvaluationResult.CompletedOrder()
-            order.isExpired(timeProvider.now()) -> OrderPaymentEvaluationResult.ExpiredOrder()
+            order.isExpired() -> OrderPaymentEvaluationResult.ExpiredOrder()
             order.misMatches(totalAmountForPayment) -> OrderPaymentEvaluationResult.MisMatchedTotalAmount()
             else -> OrderPaymentEvaluationResult.Success()
         }
+
+    private fun Order.isExpired() = this.status == OrderStatus.EXPIRED || this.isExpired(timeProvider.now())
 }

@@ -12,7 +12,7 @@ data class Order(
     val status: OrderStatus,
     val createdAt: LocalDateTime,
 ) {
-    fun isExpired(now: LocalDateTime): Boolean = status == OrderStatus.EXPIRED || createdAt.plusMinutes(EXPIRATION_MINUTES).isBefore(now)
+    fun isExpired(now: LocalDateTime): Boolean = createdAt.plusMinutes(EXPIRATION_MINUTES).isBefore(now)
 
     fun misMatches(totalAmount: Int): Boolean = this.totalAmount != totalAmount
 

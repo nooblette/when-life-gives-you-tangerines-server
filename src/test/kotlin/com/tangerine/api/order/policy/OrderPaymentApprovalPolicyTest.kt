@@ -8,16 +8,20 @@ import com.tangerine.api.order.fixture.domain.OrderDomainFixture.createExpiredOr
 import com.tangerine.api.order.fixture.domain.OrderDomainFixture.createInProgressOrder
 import com.tangerine.api.order.fixture.domain.OrderDomainFixture.createOrder
 import com.tangerine.api.order.result.OrderPaymentEvaluationResult
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.whenever
 import java.time.LocalDateTime
+import java.util.stream.Stream
+import kotlin.reflect.KClass
 
 @ExtendWith(MockitoExtension::class)
 class OrderPaymentApprovalPolicyTest {
@@ -29,12 +33,15 @@ class OrderPaymentApprovalPolicyTest {
 
     @ParameterizedTest
     @MethodSource("createNotInitialOrders")
-    fun `주문 상태가 초기가 아닌 경우 실패를 반환한다`(notInitialOrder: Order) {
+    fun `주문 상태가 초기가 아닌 경우 실패를 반환한다`(
+        notInitialOrder: Order,
+        expectedResultClass: KClass<out OrderPaymentEvaluationResult>,
+    ) {
         // when
         val result = approvalPolicy.evaluate(notInitialOrder, notInitialOrder.totalAmount)
 
         // then
-        result.shouldBeInstanceOf<OrderPaymentEvaluationResult.CompletedOrder>()
+        result::class shouldBe expectedResultClass
     }
 
     @Test
@@ -85,6 +92,11 @@ class OrderPaymentApprovalPolicyTest {
 
     companion object {
         @JvmStatic
-        fun createNotInitialOrders(): List<Order> = listOf(createDoneOrder(), createInProgressOrder(), createExpiredOrderByStatus())
+        fun createNotInitialOrders(): Stream<Arguments> =
+            Stream.of(
+                Arguments.of(createDoneOrder(), OrderPaymentEvaluationResult.CompletedOrder::class),
+                Arguments.of(createInProgressOrder(), OrderPaymentEvaluationResult.InProgressOrder::class),
+                Arguments.of(createExpiredOrderByStatus(), OrderPaymentEvaluationResult.ExpiredOrder::class),
+            )
     }
 }
