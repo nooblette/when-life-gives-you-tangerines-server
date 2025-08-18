@@ -27,6 +27,12 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:2024.0.0")
+    }
+}
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -34,6 +40,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -42,6 +49,8 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:5.8.0") // 핵심 assertion
     testImplementation("io.kotest:kotest-property:5.8.0") // property-based testing (선택)
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0") // Mockito-Kotlin 확장
+    // WireMock (FeignClient 테스트용, API 모킹을 위한 서버를 띄우고 실제 HTTP 요청/응답을 받는다)
+    testImplementation("org.wiremock:wiremock-standalone:3.9.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

@@ -62,7 +62,9 @@ class ApproveOrderPaymentUseCaseTest {
     private lateinit var paymentGatewayPort: PaymentGatewayPort
 
     private lateinit var approvalCommand: ApproveOrderPaymentCommand
+
     private lateinit var orderEntity: OrderEntity
+
     private lateinit var orderItemEntity: OrderItemEntity
 
     @BeforeEach

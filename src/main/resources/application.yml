@@ -24,3 +24,6 @@ spring:
 logging:
   level:
     org.hibernate.orm.jdbc.bind: TRACE  # 파라미터 바인딩 값까지 출력
+toss_payment:
+  base_url: http://localhost:8089
+  secret_key: dummy_key

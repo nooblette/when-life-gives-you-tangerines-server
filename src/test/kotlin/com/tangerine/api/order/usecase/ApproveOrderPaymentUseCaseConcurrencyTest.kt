@@ -58,8 +58,11 @@ class ApproveOrderPaymentUseCaseConcurrencyTest {
     private lateinit var paymentGatewayPort: PaymentGatewayPort
 
     private lateinit var approvalCommand: ApproveOrderPaymentCommand
+
     private lateinit var orderId: String
+
     private lateinit var orderEntity: OrderEntity
+
     private lateinit var orderItemEntity: OrderItemEntity
 
     @BeforeEach
