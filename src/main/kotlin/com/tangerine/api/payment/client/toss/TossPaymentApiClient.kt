@@ -1,5 +1,6 @@
 package com.tangerine.api.payment.client.toss
 
+import com.tangerine.api.common.feign.config.TossPaymentFeignConfig
 import com.tangerine.api.payment.client.toss.request.ConfirmTossPaymentRequest
 import com.tangerine.api.payment.client.toss.response.TossPayment
 import org.springframework.cloud.openfeign.FeignClient
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 @FeignClient(
     name = "toss-payment-api",
     url = "\${toss_payment.base_url}",
+    configuration = [TossPaymentFeignConfig::class],
 )
 interface TossPaymentApiClient {
     @PostMapping("/v1/payments/confirm")

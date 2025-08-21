@@ -6,9 +6,10 @@ import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.tangerine.api.payment.client.toss.exception.TossPaymentException
 import com.tangerine.api.payment.client.toss.request.ConfirmTossPaymentRequest
+import com.tangerine.api.payment.client.toss.response.TossErrorResponse
 import com.tangerine.api.payment.client.toss.response.TossPayment
-import feign.FeignException
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -63,7 +64,7 @@ class TossPaymentApiClientTest {
     }
 
     @Test
-    fun `결제 성공시 TossPayment 객체를 반환한다`() {
+    fun `결제 승인 API 호출 성공시 TossPayment 객체를 반환한다`() {
         // given
         val responseJson =
             """
@@ -106,19 +107,65 @@ class TossPaymentApiClientTest {
     }
 
     @ParameterizedTest
-    @MethodSource("paymentErrorCases")
-    fun `결제 실패시 FeignException 예외를 던진다`(
+    @MethodSource("tossErrorResponseCases")
+    fun `결제 승인 API 호출 실패시 TossPaymentException 예외로 래핑하여 던진다`(
         httpErrorStatus: HttpStatus,
-        errorResponseJson: String,
+        errorResponse: TossErrorResponse,
     ) {
         // given
         stubWireMockServer(
             httpStatus = httpErrorStatus,
-            responseJson = errorResponseJson,
+            responseJson = objectMapper.writeValueAsString(errorResponse),
         )
 
         // when & then
-        assertThrows<FeignException> {
+        val exception =
+            assertThrows<TossPaymentException> {
+                tossPaymentApiClient.confirmPayment(createAuthorizationValue(), request)
+            }
+
+        exception.code shouldBe errorResponse.code
+        exception.message shouldBe errorResponse.message
+    }
+
+    @Test
+    fun `유효하지 않은 JSON 응답시 TossPaymentException$InvalidJsonResponse 예외를 던진다`() {
+        // given
+        val responseJson =
+            """
+            {
+                "body": "invalid json"
+            }
+            """.trimIndent()
+        stubWireMockServer(
+            httpStatus = HttpStatus.BAD_REQUEST,
+            responseJson = responseJson,
+        )
+
+        // when & then
+        val exception =
+            assertThrows<TossPaymentException.InvalidJsonResponse> {
+                tossPaymentApiClient.confirmPayment(createAuthorizationValue(), request)
+            }
+
+        exception.code shouldBe "INVALID_JSON_RESPONSE"
+        exception.message shouldBe responseJson
+    }
+
+    @Test
+    fun `응답 body가 없으면 TossPaymentException$EmptyBody 예외를 던진다`() {
+        // given
+        wireMockServer.stubFor(
+            post(urlEqualTo(TOSS_PAYMENT_CONFIRM_URL))
+                .willReturn(
+                    aResponse()
+                        .withStatus(HttpStatus.BAD_REQUEST.value())
+                        .withHeader("Content-Type", "application/json"),
+                ),
+        )
+
+        // when & then
+        assertThrows<TossPaymentException.EmptyBody> {
             tossPaymentApiClient.confirmPayment(createAuthorizationValue(), request)
         }
     }
@@ -149,23 +196,42 @@ class TossPaymentApiClientTest {
         const val TOSS_PAYMENT_CONFIRM_URL = "/v1/payments/confirm"
 
         @JvmStatic
-        fun paymentErrorCases() =
+        fun tossErrorResponseCases(): List<Arguments> =
             listOf(
                 Arguments.of(
                     HttpStatus.BAD_REQUEST,
-                    """{"code": "INVALID_REQUEST", "message": "잘못된 요청입니다."}""",
+                    TossErrorResponse(
+                        code = "INVALID_REQUEST",
+                        message = "잘못된 요청입니다.",
+                    ),
                 ),
                 Arguments.of(
                     HttpStatus.UNAUTHORIZED,
-                    """{"code": "UNAUTHORIZED_KEY", "message": "인증되지 않은 시크릿 키 혹은 클라이언트 키 입니다."}""",
+                    TossErrorResponse(
+                        code = "UNAUTHORIZED_KEY",
+                        message = "인증되지 않은 시크릿 키 혹은 클라이언트 키 입니다.",
+                    ),
                 ),
                 Arguments.of(
                     HttpStatus.FORBIDDEN,
-                    """{"code": "REJECT_ACCOUNT_PAYMENT", "message": "잔액부족으로 결제에 실패했습니다."}""",
+                    TossErrorResponse(
+                        code = "REJECT_ACCOUNT_PAYMENT",
+                        message = "잔액부족으로 결제에 실패했습니다.",
+                    ),
+                ),
+                Arguments.of(
+                    HttpStatus.NOT_FOUND,
+                    TossErrorResponse(
+                        code = "NOT_FOUND_PAYMENT",
+                        message = "존재하지 않는 결제 정보 입니다.",
+                    ),
                 ),
                 Arguments.of(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    """{"code": "UNKNOWN_PAYMENT_ERROR", "message": "결제에 실패했어요. 같은 문제가 반복된다면 은행이나 카드사로 문의해주세요."}""",
+                    TossErrorResponse(
+                        code = "UNKNOWN_PAYMENT_ERROR",
+                        message = "결제에 실패했어요. 같은 문제가 반복된다면 은행이나 카드사로 문의해주세요.",
+                    ),
                 ),
             )
     }
