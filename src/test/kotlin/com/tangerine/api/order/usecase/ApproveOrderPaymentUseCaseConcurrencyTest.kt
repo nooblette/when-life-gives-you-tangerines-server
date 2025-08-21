@@ -12,12 +12,12 @@ import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository
 import com.tangerine.api.order.result.ApproveOrderPaymentResult
 import com.tangerine.api.order.result.EvaluateOrderPaymentResult
-import com.tangerine.api.payment.command.ApprovePaymentCommand
 import com.tangerine.api.payment.domain.PaymentStatus
-import com.tangerine.api.payment.fixture.command.equals
+import com.tangerine.api.payment.fixture.command.matchesOrderCommand
 import com.tangerine.api.payment.fixture.entity.findPaymentEntityByOrderId
 import com.tangerine.api.payment.port.PaymentGatewayPort
-import com.tangerine.api.payment.result.ApprovePaymentResult
+import com.tangerine.api.payment.request.ApprovePaymentRequest
+import com.tangerine.api.payment.response.ApprovePaymentResponse
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -106,10 +106,15 @@ class ApproveOrderPaymentUseCaseConcurrencyTest {
     fun `동일한 주문에 대해 동시 결제 요청을 하는 경우 한 번만 결제되고 다른 요청은 실패 결과를 반환한다`() {
         // given
         val preOrderVersion = orderRepository.findByOrderId(orderId)?.version ?: 0
-        val paymentGatewayCaptor = argumentCaptor<ApprovePaymentCommand>()
+        val paymentGatewayCaptor = argumentCaptor<ApprovePaymentRequest>()
         whenever(
             paymentGatewayPort.approve(any()),
-        ).thenReturn(ApprovePaymentResult.Success(paymentKey = approvalCommand.paymentKey))
+        ).thenReturn(
+            ApprovePaymentResponse.Success(
+                paymentKey = approvalCommand.paymentKey,
+                data = "Success",
+            ),
+        )
 
         // when
         val results =
@@ -148,7 +153,7 @@ class ApproveOrderPaymentUseCaseConcurrencyTest {
         verify(paymentGatewayPort, times(1)).approve(paymentGatewayCaptor.capture())
         paymentGatewayCaptor.allValues shouldHaveSize 1
         paymentGatewayCaptor.allValues.forEach {
-            it.equals(orderPaymentCommand = approvalCommand) shouldBe true
+            it.matchesOrderCommand(orderPaymentCommand = approvalCommand) shouldBe true
         }
 
         val actualPayment =

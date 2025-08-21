@@ -12,13 +12,13 @@ import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository
 import com.tangerine.api.order.result.ApproveOrderPaymentResult
 import com.tangerine.api.order.result.EvaluateOrderPaymentResult
-import com.tangerine.api.payment.command.ApprovePaymentCommand
 import com.tangerine.api.payment.domain.PaymentStatus
-import com.tangerine.api.payment.fixture.command.equals
+import com.tangerine.api.payment.fixture.command.matchesOrderCommand
 import com.tangerine.api.payment.fixture.entity.countPaymentEntitiesByOrderId
 import com.tangerine.api.payment.fixture.entity.findPaymentEntityByOrderId
 import com.tangerine.api.payment.port.PaymentGatewayPort
-import com.tangerine.api.payment.result.ApprovePaymentResult
+import com.tangerine.api.payment.request.ApprovePaymentRequest
+import com.tangerine.api.payment.response.ApprovePaymentResponse
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -159,7 +159,7 @@ class ApproveOrderPaymentUseCaseTest {
         ).thenReturn(EvaluateOrderPaymentResult.Success())
 
         val paymentApprovalFailure =
-            ApprovePaymentResult.Failure(
+            ApprovePaymentResponse.Failure(
                 paymentKey = approvalCommand.paymentKey,
                 message = "정지된 카드 입니다.",
                 code = "INVALID_STOPPED_CARD",
@@ -178,11 +178,11 @@ class ApproveOrderPaymentUseCaseTest {
         result.message shouldBe paymentApprovalFailure.message
 
         // 결제 프로세스 & 엔티티 검증
-        val paymentGatewayCaptor = argumentCaptor<ApprovePaymentCommand>()
+        val paymentGatewayCaptor = argumentCaptor<ApprovePaymentRequest>()
         verify(paymentGatewayPort, times(1)).approve(paymentGatewayCaptor.capture())
         paymentGatewayCaptor.allValues shouldHaveSize 1
         paymentGatewayCaptor.allValues.forEach {
-            it.equals(orderPaymentCommand = approvalCommand) shouldBe true
+            it.matchesOrderCommand(orderPaymentCommand = approvalCommand) shouldBe true
         }
 
         val actualPayment =
@@ -210,10 +210,15 @@ class ApproveOrderPaymentUseCaseTest {
             ),
         ).thenReturn(EvaluateOrderPaymentResult.Success())
 
-        val paymentGatewayCaptor = argumentCaptor<ApprovePaymentCommand>()
+        val paymentGatewayCaptor = argumentCaptor<ApprovePaymentRequest>()
         whenever(
             paymentGatewayPort.approve(any()),
-        ).thenReturn(ApprovePaymentResult.Success(paymentKey = approvalCommand.paymentKey))
+        ).thenReturn(
+            ApprovePaymentResponse.Success(
+                paymentKey = approvalCommand.paymentKey,
+                data = "Success",
+            ),
+        )
 
         // when
         val result = approveOrderPaymentUseCase.approve(approvalCommand)
@@ -225,7 +230,7 @@ class ApproveOrderPaymentUseCaseTest {
         verify(paymentGatewayPort, times(1)).approve(paymentGatewayCaptor.capture())
         paymentGatewayCaptor.allValues shouldHaveSize 1
         paymentGatewayCaptor.allValues.forEach {
-            it.equals(orderPaymentCommand = approvalCommand) shouldBe true
+            it.matchesOrderCommand(orderPaymentCommand = approvalCommand) shouldBe true
         }
 
         val actualPayment =

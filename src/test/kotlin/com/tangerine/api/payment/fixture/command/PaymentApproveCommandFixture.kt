@@ -1,9 +1,9 @@
 package com.tangerine.api.payment.fixture.command
 
 import com.tangerine.api.order.command.ApproveOrderPaymentCommand
-import com.tangerine.api.payment.command.ApprovePaymentCommand
+import com.tangerine.api.payment.request.ApprovePaymentRequest
 
-fun ApprovePaymentCommand.equals(orderPaymentCommand: ApproveOrderPaymentCommand) =
+fun ApprovePaymentRequest.matchesOrderCommand(orderPaymentCommand: ApproveOrderPaymentCommand) =
     this.orderId == orderPaymentCommand.orderId &&
         this.paymentKey == orderPaymentCommand.paymentKey &&
         this.amount == orderPaymentCommand.totalAmount

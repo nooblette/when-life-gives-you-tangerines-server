@@ -19,6 +19,7 @@ class PaymentEntity(
     val id: Long? = null,
     @Column(nullable = false)
     val orderId: String,
+    val orderName: String? = null,
     @Column(nullable = false)
     val amount: Int,
     @Enumerated(EnumType.STRING)
@@ -26,7 +27,10 @@ class PaymentEntity(
     var status: PaymentStatus,
     @Column(nullable = false)
     val paymentKey: String,
+    var failCode: String? = null,
     var failReason: String? = null,
+    val requestedAt: LocalDateTime? = null,
+    val approvedAt: LocalDateTime? = null,
     @Column(nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
     @Column(nullable = false)

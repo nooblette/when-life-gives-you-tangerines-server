@@ -16,14 +16,14 @@ class OrderCommandService(
     private val orderIdGenerator: OrderIdGenerator,
 ) {
     @Transactional
-    fun place(placeOrderCommand: PlaceOrderCommand): PlaceOrderResult {
+    fun place(command: PlaceOrderCommand): PlaceOrderResult {
         val orderId = orderIdGenerator.generate()
 
         // 주문 생성
-        val placedOrder = orderRepository.save(placeOrderCommand.toEntity(orderId))
+        val placedOrder = orderRepository.save(command.toEntity(orderId))
 
         // 주문 상품 생성
-        orderItemRepository.saveAll(placeOrderCommand.items.map { it.toEntity(placedOrder) })
+        orderItemRepository.saveAll(command.items.map { it.toEntity(placedOrder) })
         return PlaceOrderResult.Success(orderId = orderId)
     }
 }

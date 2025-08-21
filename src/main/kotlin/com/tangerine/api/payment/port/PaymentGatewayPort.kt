@@ -1,8 +1,8 @@
 package com.tangerine.api.payment.port
 
-import com.tangerine.api.payment.command.ApprovePaymentCommand
-import com.tangerine.api.payment.result.ApprovePaymentResult
+import com.tangerine.api.payment.request.ApprovePaymentRequest
+import com.tangerine.api.payment.response.ApprovePaymentResponse
 
 interface PaymentGatewayPort {
-    fun approve(command: ApprovePaymentCommand): ApprovePaymentResult
+    fun approve(request: ApprovePaymentRequest): ApprovePaymentResponse
 }

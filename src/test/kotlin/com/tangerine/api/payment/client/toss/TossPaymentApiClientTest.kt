@@ -172,9 +172,9 @@ class TossPaymentApiClientTest {
 
     private fun createAuthorizationValue(): String =
         "Basic ${
-            String(
-                Base64.getEncoder().encode("$secretKey:".toByteArray(StandardCharsets.UTF_8)),
-            )
+        String(
+            Base64.getEncoder().encode("$secretKey:".toByteArray(StandardCharsets.UTF_8)),
+        )
         }"
 
     private fun stubWireMockServer(

@@ -19,9 +19,11 @@ class PaymentStateService {
     @Transactional
     fun changeToFailed(
         paymentEntity: PaymentEntity,
+        failCode: String,
         failReason: String,
     ) {
         paymentEntity.status = PaymentStatus.FAILED
+        paymentEntity.failCode = failCode
         paymentEntity.failReason = failReason
         logger.info { "결제 상태 ${PaymentStatus.FAILED}로 변경, 실패 사유: $failReason" }
     }
