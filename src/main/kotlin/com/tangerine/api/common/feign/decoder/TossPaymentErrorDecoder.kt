@@ -30,7 +30,7 @@ class TossPaymentErrorDecoder(
             }
 
         return when {
-            httpStatus == HttpStatus.UNAUTHORIZED -> TossPaymentException.UnauthorizedKey()
+            httpStatus == HttpStatus.UNAUTHORIZED -> TossPaymentException.unauthorizedKey()
             httpStatus.isError -> errorHandling(httpStatus = httpStatus, responseBody = responseBody)
             else -> ApiCallException(httpStatus = httpStatus, methodKey = methodKey, responseBody = responseBody)
         }
@@ -49,12 +49,10 @@ class TossPaymentErrorDecoder(
     }.getOrElse {
         when {
             responseBody.isNullOrBlank() ->
-                TossPaymentException.EmptyBody(
-                    httpStatus = httpStatus,
-                    message = "응답 본문이 비어있습니다.",
-                )
+                TossPaymentException.emptyBody(httpStatus = httpStatus)
+
             else ->
-                TossPaymentException.InvalidJsonResponse(
+                TossPaymentException.invalidJsonResponse(
                     httpStatus = httpStatus,
                     message = responseBody,
                 )

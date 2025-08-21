@@ -129,8 +129,9 @@ class TossPaymentApiClientTest {
     }
 
     @Test
-    fun `유효하지 않은 JSON 응답시 TossPaymentException$InvalidJsonResponse 예외를 던진다`() {
+    fun `유효하지 않은 JSON 응답시 invalidJsonResponse 예외를 던진다`() {
         // given
+        val httpStatus = HttpStatus.BAD_REQUEST
         val responseJson =
             """
             {
@@ -138,36 +139,45 @@ class TossPaymentApiClientTest {
             }
             """.trimIndent()
         stubWireMockServer(
-            httpStatus = HttpStatus.BAD_REQUEST,
+            httpStatus = httpStatus,
             responseJson = responseJson,
         )
 
-        // when & then
+        // when
         val exception =
-            assertThrows<TossPaymentException.InvalidJsonResponse> {
+            assertThrows<TossPaymentException> {
                 tossPaymentApiClient.confirmPayment(createAuthorizationValue(), request)
             }
 
-        exception.code shouldBe "INVALID_JSON_RESPONSE"
-        exception.message shouldBe responseJson
+        // then
+        val expectedException = TossPaymentException.invalidJsonResponse(httpStatus = httpStatus, message = responseJson)
+        exception.code shouldBe expectedException.code
+        exception.message shouldBe expectedException.message
     }
 
     @Test
-    fun `응답 body가 없으면 TossPaymentException$EmptyBody 예외를 던진다`() {
+    fun `응답 body가 없으면 emptyBody 예외를 던진다`() {
         // given
+        val httpStatus = HttpStatus.BAD_REQUEST
         wireMockServer.stubFor(
             post(urlEqualTo(TOSS_PAYMENT_CONFIRM_URL))
                 .willReturn(
                     aResponse()
-                        .withStatus(HttpStatus.BAD_REQUEST.value())
+                        .withStatus(httpStatus.value())
                         .withHeader("Content-Type", "application/json"),
                 ),
         )
 
-        // when & then
-        assertThrows<TossPaymentException.EmptyBody> {
-            tossPaymentApiClient.confirmPayment(createAuthorizationValue(), request)
-        }
+        // when
+        val exception =
+            assertThrows<TossPaymentException> {
+                tossPaymentApiClient.confirmPayment(createAuthorizationValue(), request)
+            }
+
+        // then
+        val expectedException = TossPaymentException.emptyBody(httpStatus = httpStatus)
+        exception.code shouldBe expectedException.code
+        exception.message shouldBe expectedException.message
     }
 
     private fun createAuthorizationValue(): String =

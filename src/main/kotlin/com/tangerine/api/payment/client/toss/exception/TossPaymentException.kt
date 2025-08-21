@@ -7,21 +7,29 @@ open class TossPaymentException(
     open val code: String,
     override val message: String,
 ) : RuntimeException(message) {
-    class UnauthorizedKey(
-        override val httpStatus: HttpStatus = HttpStatus.UNAUTHORIZED,
-        override val code: String = "UNAUTHORIZED_KEY",
-        override val message: String = "인증되지 않은 시크릿 키 혹은 클라이언트 키 입니다.",
-    ) : TossPaymentException(httpStatus, code, message)
+    companion object {
+        fun unauthorizedKey(): TossPaymentException =
+            TossPaymentException(
+                httpStatus = HttpStatus.UNAUTHORIZED,
+                code = "UNAUTHORIZED_KEY",
+                message = "인증되지 않은 시크릿 키 혹은 클라이언트 키 입니다.",
+            )
 
-    class EmptyBody(
-        override val httpStatus: HttpStatus,
-        override val code: String = "UNKNOWN_ERROR",
-        override val message: String,
-    ) : TossPaymentException(httpStatus, code, message)
+        fun emptyBody(httpStatus: HttpStatus): TossPaymentException =
+            TossPaymentException(
+                httpStatus = httpStatus,
+                code = "UNKNOWN_ERROR",
+                message = "응답 본문이 비어있습니다.",
+            )
 
-    class InvalidJsonResponse(
-        override val httpStatus: HttpStatus,
-        override val code: String = "INVALID_JSON_RESPONSE",
-        override val message: String,
-    ) : TossPaymentException(httpStatus, code, message)
+        fun invalidJsonResponse(
+            httpStatus: HttpStatus,
+            message: String,
+        ): TossPaymentException =
+            TossPaymentException(
+                httpStatus = httpStatus,
+                code = "INVALID_JSON_RESPONSE",
+                message = message,
+            )
+    }
 }

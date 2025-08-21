@@ -61,7 +61,7 @@ class TossPaymentGatewayAdaptorTest {
     @Test
     fun `TossPaymentException 발생시 Failure 응답을 반환한다`() {
         // given
-        val exception = TossPaymentException.UnauthorizedKey()
+        val exception = TossPaymentException.unauthorizedKey()
         `when`(
             tossPaymentApiClient.confirmPayment(any(), any()),
         ).thenThrow(exception)
