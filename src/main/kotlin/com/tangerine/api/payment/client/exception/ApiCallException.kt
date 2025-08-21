@@ -3,17 +3,17 @@ package com.tangerine.api.payment.client.exception
 import org.springframework.http.HttpStatus
 
 class ApiCallException(
-    httpStatus: HttpStatus,
+    val httpStatus: HttpStatus,
     // API 호출 정보
     methodKey: String? = null,
     // 서버 응답 에러 메시지
     responseBody: String? = null,
 ) : RuntimeException(buildMessage(httpStatus, methodKey, responseBody)) {
     companion object {
-        private fun buildMessage(
+        fun buildMessage(
             httpStatus: HttpStatus,
-            methodKey: String?,
-            responseBody: String?,
+            methodKey: String? = null,
+            responseBody: String? = null,
         ): String =
             buildString {
                 append("API call failed")

@@ -6,8 +6,11 @@ import com.tangerine.api.payment.client.toss.exception.TossPaymentException
 import com.tangerine.api.payment.mapper.toConfirmTossPaymentRequest
 import com.tangerine.api.payment.request.ApprovePaymentRequest
 import com.tangerine.api.payment.response.ApprovePaymentResponse
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+
+private val logger = KotlinLogging.logger {}
 
 @Component
 class TossPaymentGatewayAdaptor(
@@ -30,18 +33,30 @@ class TossPaymentGatewayAdaptor(
         paymentKey: String,
         exception: Throwable,
     ) = when (exception) {
-        is TossPaymentException ->
+        is TossPaymentException -> {
+            logger.error(
+                "토스페이먼츠 결제 승인 API call failed " +
+                    "(${exception.httpStatus.value()} ${exception.httpStatus.reasonPhrase}): " +
+                    "${exception.code}(${exception.message})",
+            )
             ApprovePaymentResponse.Failure(
                 paymentKey = paymentKey,
                 code = exception.code,
                 message = exception.message,
             )
+        }
 
-        is ApiCallException ->
+        is ApiCallException -> {
+            logger.error(
+                "API call failed " +
+                    "(${exception.httpStatus.value()} ${exception.httpStatus.reasonPhrase}): " +
+                    "${ApiCallException.buildMessage(httpStatus = exception.httpStatus)})",
+            )
             ApprovePaymentResponse.Failure.apiCallError(
                 paymentKey = paymentKey,
                 message = exception.message,
             )
+        }
 
         else -> ApprovePaymentResponse.Failure.unknownError(paymentKey)
     }
