@@ -14,12 +14,14 @@ sealed class ApprovePaymentResponse(
         val message: String,
     ) : ApprovePaymentResponse(paymentKey = paymentKey) {
         companion object {
-            fun apiCallError(paymentKey: String) =
-                Failure(
-                    paymentKey = paymentKey,
-                    code = "API_CALL_ERROR",
-                    message = "알 수 없는 오류로 결제 요청에 실패했습니다.",
-                )
+            fun apiCallError(
+                paymentKey: String,
+                message: String?,
+            ) = Failure(
+                paymentKey = paymentKey,
+                code = "API_CALL_ERROR",
+                message = message ?: "알 수 없는 오류로 결제 요청에 실패했습니다.",
+            )
 
             fun unknownError(paymentKey: String) =
                 Failure(

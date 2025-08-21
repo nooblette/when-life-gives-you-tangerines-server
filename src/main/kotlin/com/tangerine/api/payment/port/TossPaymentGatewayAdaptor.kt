@@ -1,11 +1,11 @@
 package com.tangerine.api.payment.port
 
+import com.tangerine.api.payment.client.exception.ApiCallException
 import com.tangerine.api.payment.client.toss.TossPaymentApiClient
 import com.tangerine.api.payment.client.toss.exception.TossPaymentException
 import com.tangerine.api.payment.mapper.toConfirmTossPaymentRequest
 import com.tangerine.api.payment.request.ApprovePaymentRequest
 import com.tangerine.api.payment.response.ApprovePaymentResponse
-import feign.FeignException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -37,7 +37,11 @@ class TossPaymentGatewayAdaptor(
                 message = exception.message,
             )
 
-        is FeignException -> ApprovePaymentResponse.Failure.apiCallError(paymentKey)
+        is ApiCallException ->
+            ApprovePaymentResponse.Failure.apiCallError(
+                paymentKey = paymentKey,
+                message = exception.message,
+            )
 
         else -> ApprovePaymentResponse.Failure.unknownError(paymentKey)
     }

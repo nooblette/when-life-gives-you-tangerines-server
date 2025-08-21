@@ -2,9 +2,9 @@ package com.tangerine.api.common.feign.decoder
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.tangerine.api.payment.client.exception.ApiCallException
 import com.tangerine.api.payment.client.toss.exception.TossPaymentException
 import com.tangerine.api.payment.client.toss.response.TossErrorResponse
-import feign.FeignException
 import feign.Response
 import feign.Util
 import feign.codec.ErrorDecoder
@@ -24,23 +24,23 @@ class TossPaymentErrorDecoder(
         response: Response,
     ): Exception {
         val httpStatus = HttpStatus.valueOf(response.status())
-        val errorBody =
+        val responseBody =
             response.body()?.let {
                 Util.toString(it.asReader(StandardCharsets.UTF_8))
             }
 
         return when {
             httpStatus == HttpStatus.UNAUTHORIZED -> TossPaymentException.UnauthorizedKey()
-            httpStatus.isError -> errorHandling(errorBody, httpStatus)
-            else -> FeignException.errorStatus(methodKey, response)
+            httpStatus.isError -> errorHandling(httpStatus = httpStatus, responseBody = responseBody)
+            else -> ApiCallException(httpStatus = httpStatus, methodKey = methodKey, responseBody = responseBody)
         }
     }
 
     private fun errorHandling(
-        errorBody: String?,
         httpStatus: HttpStatus,
+        responseBody: String?,
     ) = runCatching {
-        val tossError = objectMapper.readValue(errorBody, TossErrorResponse::class.java)
+        val tossError = objectMapper.readValue(responseBody, TossErrorResponse::class.java)
         TossPaymentException(
             httpStatus = httpStatus,
             code = tossError.code,
@@ -48,7 +48,7 @@ class TossPaymentErrorDecoder(
         )
     }.getOrElse {
         when {
-            errorBody.isNullOrBlank() ->
+            responseBody.isNullOrBlank() ->
                 TossPaymentException.EmptyBody(
                     httpStatus = httpStatus,
                     message = "응답 본문이 비어있습니다.",
@@ -56,7 +56,7 @@ class TossPaymentErrorDecoder(
             else ->
                 TossPaymentException.InvalidJsonResponse(
                     httpStatus = httpStatus,
-                    message = errorBody,
+                    message = responseBody,
                 )
         }
     }

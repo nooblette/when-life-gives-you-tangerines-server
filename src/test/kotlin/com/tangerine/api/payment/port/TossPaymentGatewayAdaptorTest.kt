@@ -1,12 +1,12 @@
 package com.tangerine.api.payment.port
 
+import com.tangerine.api.payment.client.exception.ApiCallException
 import com.tangerine.api.payment.client.toss.TossPaymentApiClient
 import com.tangerine.api.payment.client.toss.exception.TossPaymentException
 import com.tangerine.api.payment.client.toss.response.TossPayment
 import com.tangerine.api.payment.fixture.client.toss.response.tossPayment
 import com.tangerine.api.payment.request.ApprovePaymentRequest
 import com.tangerine.api.payment.response.ApprovePaymentResponse
-import feign.FeignException
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.BeforeEach
@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import org.springframework.http.HttpStatus
 
 class TossPaymentGatewayAdaptorTest {
     private lateinit var tossPaymentApiClient: TossPaymentApiClient
@@ -76,19 +77,31 @@ class TossPaymentGatewayAdaptorTest {
     }
 
     @Test
-    fun `FeignException 발생시 apiCallError 응답을 반환한다`() {
+    fun `ApiCallException 발생시 apiCallError 응답을 반환한다`() {
         // given
-        val feignException = mock<FeignException>()
+        val httpStatus = HttpStatus.BAD_REQUEST
+        val methodKey = "PaymentClient#confirm(Long)"
+        val responseBody = "Invalid Payment"
+        val apiCallException =
+            ApiCallException(
+                httpStatus = httpStatus,
+                methodKey = methodKey,
+                responseBody = responseBody,
+            )
         `when`(
             tossPaymentApiClient.confirmPayment(any(), any()),
-        ).thenThrow(feignException)
+        ).thenThrow(apiCallException)
 
         // when
         val response = tossPaymentGatewayAdaptor.approve(request)
 
         // then
         response.shouldBeInstanceOf<ApprovePaymentResponse.Failure>()
-        response shouldBe ApprovePaymentResponse.Failure.apiCallError(request.paymentKey)
+        response shouldBe
+            ApprovePaymentResponse.Failure.apiCallError(
+                paymentKey = request.paymentKey,
+                message = "API call failed [$methodKey] (${httpStatus.value()} ${httpStatus.reasonPhrase}): $responseBody",
+            )
     }
 
     @Test
