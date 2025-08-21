@@ -11,14 +11,14 @@ import com.tangerine.api.order.domain.Customer
 import com.tangerine.api.order.domain.Order
 import com.tangerine.api.order.domain.OrderItem
 
-fun PlaceOrderRequest.toPlaceOrderCommand(): PlaceOrderCommand =
+fun PlaceOrderRequest.toPlaceOrderCommand() =
     PlaceOrderCommand(
         customer = customer.toDomain(),
         items = items.map(OrderItemRequest::toDomain),
         totalAmount = totalAmount,
     )
 
-fun CustomerRequest.toDomain(): Customer =
+fun CustomerRequest.toDomain() =
     Customer(
         name = this.name,
         recipient = this.recipient,
@@ -28,7 +28,7 @@ fun CustomerRequest.toDomain(): Customer =
         zipCode = this.zipCode,
     )
 
-fun OrderItemRequest.toDomain(): OrderItem =
+fun OrderItemRequest.toDomain() =
     OrderItem(
         id = this.id,
         name = this.name,
@@ -36,7 +36,7 @@ fun OrderItemRequest.toDomain(): OrderItem =
         quantity = this.quantity,
     )
 
-fun Order.toResponse(): OrderResponse =
+fun Order.toResponse() =
     OrderResponse(
         orderId = this.orderId,
         customer = this.customer.toResponse(),
@@ -44,7 +44,7 @@ fun Order.toResponse(): OrderResponse =
         totalAmount = this.totalAmount,
     )
 
-fun Customer.toResponse(): CustomerResponse =
+fun Customer.toResponse() =
     CustomerResponse(
         name = this.name,
         recipient = this.recipient,
@@ -54,9 +54,9 @@ fun Customer.toResponse(): CustomerResponse =
         zipCode = this.zipCode,
     )
 
-fun List<OrderItem>.toResponses(): List<OrderItemResponse> = this.map { it.toResponse() }
+fun List<OrderItem>.toResponses() = this.map { it.toResponse() }
 
-private fun OrderItem.toResponse(): OrderItemResponse =
+private fun OrderItem.toResponse() =
     OrderItemResponse(
         id = this.id,
         name = this.name,
