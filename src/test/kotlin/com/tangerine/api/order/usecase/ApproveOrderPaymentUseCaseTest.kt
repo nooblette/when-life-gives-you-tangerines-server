@@ -13,9 +13,9 @@ import com.tangerine.api.order.repository.OrderRepository
 import com.tangerine.api.order.result.ApproveOrderPaymentResult
 import com.tangerine.api.order.result.EvaluateOrderPaymentResult
 import com.tangerine.api.payment.domain.PaymentStatus
-import com.tangerine.api.payment.fixture.command.matchesOrderCommand
 import com.tangerine.api.payment.fixture.entity.countPaymentEntitiesByOrderId
 import com.tangerine.api.payment.fixture.entity.findPaymentEntityByOrderId
+import com.tangerine.api.payment.fixture.request.matchesOrderCommand
 import com.tangerine.api.payment.port.PaymentGatewayPort
 import com.tangerine.api.payment.request.ApprovePaymentRequest
 import com.tangerine.api.payment.response.ApprovePaymentResponse

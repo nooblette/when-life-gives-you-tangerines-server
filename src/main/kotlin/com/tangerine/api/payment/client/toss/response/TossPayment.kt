@@ -19,7 +19,7 @@ data class TossPayment(
     val method: PaymentMethod?,
     val totalAmount: Int,
     val balanceAmount: Int,
-    val status: PaymentStatus,
+    val status: TossPaymentStatus,
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     val requestedAt: LocalDateTime,
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")

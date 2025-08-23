@@ -35,7 +35,7 @@ class TossPaymentGatewayAdaptor(
         paymentKey: String,
         responseData: TossPayment,
     ): ApprovePaymentResponse {
-        logger.info("토스페이먼츠 결제 승인 성공 $responseData")
+        logger.info("Payment(PaymentKey = $paymentKey) 토스페이먼츠 결제 승인 성공 $responseData")
         return ApprovePaymentResponse.Success(
             paymentKey = paymentKey,
             orderName = responseData.orderName,
@@ -51,7 +51,7 @@ class TossPaymentGatewayAdaptor(
         when (exception) {
             is TossPaymentException -> {
                 logger.error(
-                    "토스페이먼츠 결제 승인 API call failed " +
+                    "Payment(PaymentKey = $paymentKey) 토스페이먼츠 결제 승인 실패 " +
                         "(${exception.httpStatus.value()} ${exception.httpStatus.reasonPhrase}): " +
                         "${exception.code}(${exception.message})",
                 )

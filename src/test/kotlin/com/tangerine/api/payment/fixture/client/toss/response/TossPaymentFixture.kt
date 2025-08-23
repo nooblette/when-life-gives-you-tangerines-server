@@ -1,8 +1,8 @@
 package com.tangerine.api.payment.fixture.client.toss.response
 
-import com.tangerine.api.payment.client.toss.response.PaymentStatus
 import com.tangerine.api.payment.client.toss.response.PaymentType
 import com.tangerine.api.payment.client.toss.response.TossPayment
+import com.tangerine.api.payment.client.toss.response.TossPaymentStatus
 import java.time.LocalDateTime
 
 fun tossPayment() =
@@ -17,7 +17,7 @@ fun tossPayment() =
         method = null,
         totalAmount = 50000,
         balanceAmount = 50000,
-        status = PaymentStatus.DONE,
+        status = TossPaymentStatus.DONE,
         requestedAt = LocalDateTime.of(2024, 8, 21, 14, 30, 0),
         approvedAt = LocalDateTime.of(2024, 8, 21, 14, 30, 10),
         useEscrow = false,

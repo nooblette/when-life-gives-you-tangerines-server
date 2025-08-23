@@ -22,7 +22,7 @@ class PaymentStateService {
         paymentEntity.orderName = orderName
         paymentEntity.requestedAt = requestAt
         paymentEntity.approvedAt = approvedAt
-        logger.info { "결제 상태 ${PaymentStatus.COMPLETED}로 변경" }
+        logger.info { "Payment(id = ${paymentEntity.id}) 결제 상태 변경 (status = ${PaymentStatus.COMPLETED})" }
     }
 
     @Transactional
@@ -34,6 +34,6 @@ class PaymentStateService {
         paymentEntity.status = PaymentStatus.FAILED
         paymentEntity.failCode = failCode
         paymentEntity.failReason = failReason
-        logger.info { "결제 상태 ${PaymentStatus.FAILED}로 변경, 실패 사유: $failReason" }
+        logger.info { "Payment(id = ${paymentEntity.id}) 결제 상태 변경 (status = ${PaymentStatus.FAILED}), 사유: $failReason" }
     }
 }

@@ -34,7 +34,7 @@ enum class PaymentMethod {
     GAME_CULTURE_GIFT_CERTIFICATE,
 }
 
-enum class PaymentStatus {
+enum class TossPaymentStatus {
     READY,
     IN_PROGRESS,
     WAITING_FOR_DEPOSIT,

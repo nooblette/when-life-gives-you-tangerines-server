@@ -1,4 +1,4 @@
-package com.tangerine.api.payment.fixture.command
+package com.tangerine.api.payment.fixture.request
 
 import com.tangerine.api.order.command.ApproveOrderPaymentCommand
 import com.tangerine.api.payment.request.ApprovePaymentRequest
