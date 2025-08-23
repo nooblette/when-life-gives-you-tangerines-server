@@ -3,6 +3,7 @@ package com.tangerine.api.payment.port
 import com.tangerine.api.payment.client.exception.ApiCallException
 import com.tangerine.api.payment.client.toss.TossPaymentApiClient
 import com.tangerine.api.payment.client.toss.exception.TossPaymentException
+import com.tangerine.api.payment.domain.PaymentGateway.TOSS
 import com.tangerine.api.payment.fixture.client.toss.response.tossPayment
 import com.tangerine.api.payment.request.ApprovePaymentRequest
 import com.tangerine.api.payment.response.ApprovePaymentResponse
@@ -55,7 +56,7 @@ class TossPaymentGatewayAdaptorTest {
         actualResponse.shouldBeInstanceOf<ApprovePaymentResponse.Success>()
         actualResponse.paymentKey shouldBe request.paymentKey
         actualResponse.orderName shouldBe expectedResponse.orderName
-        actualResponse.requestAt shouldBe expectedResponse.requestedAt
+        actualResponse.requestedAt shouldBe expectedResponse.requestedAt
         actualResponse.approvedAt shouldBe expectedResponse.approvedAt
     }
 
@@ -101,6 +102,7 @@ class TossPaymentGatewayAdaptorTest {
         response shouldBe
             ApprovePaymentResponse.Failure.apiCallError(
                 paymentKey = request.paymentKey,
+                paymentGateway = TOSS,
                 message = "API call failed [$methodKey] (${httpStatus.value()} ${httpStatus.reasonPhrase}): $responseBody",
             )
     }
@@ -118,6 +120,10 @@ class TossPaymentGatewayAdaptorTest {
 
         // then
         response.shouldBeInstanceOf<ApprovePaymentResponse.Failure>()
-        response shouldBe ApprovePaymentResponse.Failure.unknownError(request.paymentKey)
+        response shouldBe
+            ApprovePaymentResponse.Failure.unknownError(
+                paymentKey = request.paymentKey,
+                paymentGateway = TOSS,
+            )
     }
 }

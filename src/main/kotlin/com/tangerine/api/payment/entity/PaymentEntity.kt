@@ -1,5 +1,6 @@
 package com.tangerine.api.payment.entity
 
+import com.tangerine.api.payment.domain.PaymentGateway
 import com.tangerine.api.payment.domain.PaymentStatus
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -27,6 +28,8 @@ class PaymentEntity(
     var status: PaymentStatus,
     @Column(nullable = false)
     val paymentKey: String,
+    @Enumerated(EnumType.STRING)
+    var paymentGateway: PaymentGateway? = null,
     var failCode: String? = null,
     var failReason: String? = null,
     var requestedAt: LocalDateTime? = null,

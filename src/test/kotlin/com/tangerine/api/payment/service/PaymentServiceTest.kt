@@ -61,7 +61,7 @@ class PaymentServiceTest {
             )
         paymentEntity.status shouldBe PaymentStatus.COMPLETED
         paymentEntity.orderName shouldBe expectedResponse.orderName
-        paymentEntity.requestedAt shouldBe expectedResponse.requestAt
+        paymentEntity.requestedAt shouldBe expectedResponse.requestedAt
         paymentEntity.approvedAt shouldBe expectedResponse.approvedAt
     }
 

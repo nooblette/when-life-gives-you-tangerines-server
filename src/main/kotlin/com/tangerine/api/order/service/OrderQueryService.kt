@@ -26,7 +26,7 @@ class OrderQueryService(
     fun getOrderByOrderIdWithEntity(orderId: String): OrderWithEntity {
         val orderEntity =
             requireNotNull(orderRepository.findByOrderId(orderId)) {
-                "${orderId}에 해당하는 주문 정보가 없습니다."
+                "잘못된 주문 Id 입니다."
             }
 
         val orderItems = orderItemRepository.findByOrder(orderEntity).toDomains()

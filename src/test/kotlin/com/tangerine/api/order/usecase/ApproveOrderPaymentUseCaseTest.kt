@@ -12,6 +12,7 @@ import com.tangerine.api.order.repository.OrderItemRepository
 import com.tangerine.api.order.repository.OrderRepository
 import com.tangerine.api.order.result.ApproveOrderPaymentResult
 import com.tangerine.api.order.result.EvaluateOrderPaymentResult
+import com.tangerine.api.payment.domain.PaymentGateway.TOSS
 import com.tangerine.api.payment.domain.PaymentStatus
 import com.tangerine.api.payment.fixture.entity.countPaymentEntitiesByOrderId
 import com.tangerine.api.payment.fixture.entity.findPaymentEntityByOrderId
@@ -162,6 +163,7 @@ class ApproveOrderPaymentUseCaseTest {
         val paymentApprovalFailure =
             ApprovePaymentResponse.Failure(
                 paymentKey = approvalCommand.paymentKey,
+                paymentGateway = TOSS,
                 message = "정지된 카드 입니다.",
                 code = "INVALID_STOPPED_CARD",
             )

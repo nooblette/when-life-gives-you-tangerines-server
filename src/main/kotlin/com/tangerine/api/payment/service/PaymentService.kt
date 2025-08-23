@@ -45,9 +45,7 @@ class PaymentService(
     ) {
         paymentStateService.changeToCompleted(
             paymentEntity = paymentEntity,
-            orderName = paymentResponse.orderName,
-            requestAt = paymentResponse.requestAt,
-            approvedAt = paymentResponse.approvedAt,
+            paymentResponse = paymentResponse,
         )
         logger.info { "$command 결제 성공" }
     }
@@ -59,8 +57,7 @@ class PaymentService(
     ) {
         paymentStateService.changeToFailed(
             paymentEntity = paymentEntity,
-            failCode = paymentResponse.code,
-            failReason = paymentResponse.message,
+            paymentResponse = paymentResponse,
         )
         logger.info { "$command 결제 실패" }
     }

@@ -31,12 +31,12 @@ class TossPaymentErrorDecoder(
 
         return when {
             httpStatus == HttpStatus.UNAUTHORIZED -> TossPaymentException.unauthorizedKey()
-            httpStatus.isError -> errorHandling(httpStatus = httpStatus, responseBody = responseBody)
+            httpStatus.isError -> errorHandler(httpStatus = httpStatus, responseBody = responseBody)
             else -> ApiCallException(httpStatus = httpStatus, methodKey = methodKey, responseBody = responseBody)
         }
     }
 
-    private fun errorHandling(
+    private fun errorHandler(
         httpStatus: HttpStatus,
         responseBody: String?,
     ) = runCatching {

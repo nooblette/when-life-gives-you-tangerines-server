@@ -4,6 +4,7 @@ import com.tangerine.api.payment.client.exception.ApiCallException
 import com.tangerine.api.payment.client.toss.TossPaymentApiClient
 import com.tangerine.api.payment.client.toss.exception.TossPaymentException
 import com.tangerine.api.payment.client.toss.response.TossPayment
+import com.tangerine.api.payment.domain.PaymentGateway.TOSS
 import com.tangerine.api.payment.mapper.toConfirmTossPaymentRequest
 import com.tangerine.api.payment.request.ApprovePaymentRequest
 import com.tangerine.api.payment.response.ApprovePaymentResponse
@@ -38,8 +39,9 @@ class TossPaymentGatewayAdaptor(
         logger.info("Payment(PaymentKey = $paymentKey) 토스페이먼츠 결제 승인 성공 $responseData")
         return ApprovePaymentResponse.Success(
             paymentKey = paymentKey,
+            paymentGateway = TOSS,
             orderName = responseData.orderName,
-            requestAt = responseData.requestedAt,
+            requestedAt = responseData.requestedAt,
             approvedAt = responseData.approvedAt ?: LocalDateTime.now(),
         )
     }
@@ -57,6 +59,7 @@ class TossPaymentGatewayAdaptor(
                 )
                 ApprovePaymentResponse.Failure(
                     paymentKey = paymentKey,
+                    paymentGateway = TOSS,
                     code = exception.code,
                     message = exception.message,
                 )
@@ -70,10 +73,15 @@ class TossPaymentGatewayAdaptor(
                 )
                 ApprovePaymentResponse.Failure.apiCallError(
                     paymentKey = paymentKey,
+                    paymentGateway = TOSS,
                     message = exception.message,
                 )
             }
 
-            else -> ApprovePaymentResponse.Failure.unknownError(paymentKey)
+            else ->
+                ApprovePaymentResponse.Failure.unknownError(
+                    paymentKey = paymentKey,
+                    paymentGateway = TOSS,
+                )
         }
 }
