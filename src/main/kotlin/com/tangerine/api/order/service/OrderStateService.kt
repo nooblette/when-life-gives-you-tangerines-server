@@ -19,12 +19,12 @@ class OrderStateService(
     fun markAsInProgress(orderEntity: OrderEntity) {
         try {
             orderEntity.status = OrderStatus.IN_PROGRESS
-            logger.info { "주문 상태 ${OrderStatus.IN_PROGRESS}로 변경" }
+            logger.info { "Order(id = ${orderEntity.id}, orderId = ${orderEntity.orderId}) 주문 상태 변경 (status = ${OrderStatus.IN_PROGRESS})" }
 
             // 빠른 버전 충돌 인지를 위함
             orderRepository.flush()
         } catch (e: OptimisticLockingFailureException) {
-            logger.info { "주문 승인 실패(id : ${orderEntity.id}) 엔티티 버전 충돌" }
+            logger.info { "Order(id = ${orderEntity.id}, orderId = ${orderEntity.orderId}) 주문 승인 실패, 사유 : 엔티티 버전 충돌)" }
             throw OrderAlreadyInProgressException()
         }
     }
@@ -32,12 +32,12 @@ class OrderStateService(
     @Transactional
     fun changeToDone(orderEntity: OrderEntity) {
         orderEntity.status = OrderStatus.DONE
-        logger.info { "주문 상태 ${OrderStatus.DONE}로 변경" }
+        logger.info { "Order(id = ${orderEntity.id}, orderId = ${orderEntity.orderId}) 주문 상태 변경 (status = ${OrderStatus.DONE})" }
     }
 
     @Transactional
     fun changeToPaymentFailure(orderEntity: OrderEntity) {
         orderEntity.status = OrderStatus.PAYMENT_FAILURE
-        logger.info { "주문 상태 ${OrderStatus.PAYMENT_FAILURE}로 변경" }
+        logger.info { "Order(id = ${orderEntity.id}, orderId = ${orderEntity.orderId}) 주문 상태 변경 (status = ${OrderStatus.PAYMENT_FAILURE})" }
     }
 }
