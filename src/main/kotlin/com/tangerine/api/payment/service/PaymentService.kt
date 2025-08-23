@@ -4,6 +4,7 @@ import com.tangerine.api.payment.command.ApprovePaymentCommand
 import com.tangerine.api.payment.domain.PaymentStatus
 import com.tangerine.api.payment.entity.PaymentEntity
 import com.tangerine.api.payment.mapper.toApprovePaymentRequest
+import com.tangerine.api.payment.mapper.toApprovePaymentResult
 import com.tangerine.api.payment.port.PaymentGatewayPort
 import com.tangerine.api.payment.repository.PaymentRepository
 import com.tangerine.api.payment.response.ApprovePaymentResponse
@@ -27,36 +28,41 @@ class PaymentService(
         val paymentEntity = createPreparedPayment(command)
 
         // 결제 승인 API 호출
-        return when (val paymentResponse = paymentGatewayPort.approve(request = command.toApprovePaymentRequest())) {
-            is ApprovePaymentResponse.Success -> {
-                paymentStateService.changeToCompleted(
-                    paymentEntity = paymentEntity,
-                    orderName = paymentResponse.orderName,
-                    requestAt = paymentResponse.requestAt,
-                    approvedAt = paymentResponse.approvedAt,
-                )
-                logger.info { "$command 결제 성공" }
+        return paymentGatewayPort
+            .approve(command.toApprovePaymentRequest())
+            .also { paymentResponse ->
+                when (paymentResponse) {
+                    is ApprovePaymentResponse.Success -> successHandler(paymentEntity, paymentResponse, command)
+                    is ApprovePaymentResponse.Failure -> failureHandler(paymentEntity, paymentResponse, command)
+                }
+            }.toApprovePaymentResult()
+    }
 
-                // TODO Mapper 호출
-                ApprovePaymentResult.Success(paymentKey = paymentResponse.paymentKey)
-            }
+    private fun successHandler(
+        paymentEntity: PaymentEntity,
+        paymentResponse: ApprovePaymentResponse.Success,
+        command: ApprovePaymentCommand,
+    ) {
+        paymentStateService.changeToCompleted(
+            paymentEntity = paymentEntity,
+            orderName = paymentResponse.orderName,
+            requestAt = paymentResponse.requestAt,
+            approvedAt = paymentResponse.approvedAt,
+        )
+        logger.info { "$command 결제 성공" }
+    }
 
-            is ApprovePaymentResponse.Failure -> {
-                paymentStateService.changeToFailed(
-                    paymentEntity = paymentEntity,
-                    failCode = paymentResponse.code,
-                    failReason = paymentResponse.message,
-                )
-                logger.info { "$command 결제 실패" }
-
-                // TODO Mapper 호출
-                ApprovePaymentResult.Failure(
-                    paymentKey = paymentResponse.paymentKey,
-                    code = paymentResponse.code,
-                    message = paymentResponse.message,
-                )
-            }
-        }
+    private fun failureHandler(
+        paymentEntity: PaymentEntity,
+        paymentResponse: ApprovePaymentResponse.Failure,
+        command: ApprovePaymentCommand,
+    ) {
+        paymentStateService.changeToFailed(
+            paymentEntity = paymentEntity,
+            failCode = paymentResponse.code,
+            failReason = paymentResponse.message,
+        )
+        logger.info { "$command 결제 실패" }
     }
 
     private fun createPreparedPayment(command: ApprovePaymentCommand): PaymentEntity =
