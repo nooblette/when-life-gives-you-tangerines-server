@@ -19,6 +19,7 @@ import com.tangerine.api.payment.fixture.entity.findPaymentEntityByOrderId
 import com.tangerine.api.payment.port.PaymentGatewayPort
 import com.tangerine.api.payment.request.ApprovePaymentRequest
 import com.tangerine.api.payment.response.ApprovePaymentResponse
+import com.tangerine.api.payment.response.success
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -214,10 +215,7 @@ class ApproveOrderPaymentUseCaseTest {
         whenever(
             paymentGatewayPort.approve(any()),
         ).thenReturn(
-            ApprovePaymentResponse.Success(
-                paymentKey = approvalCommand.paymentKey,
-                data = "Success",
-            ),
+            success(paymentKey = approvalCommand.paymentKey),
         )
 
         // when

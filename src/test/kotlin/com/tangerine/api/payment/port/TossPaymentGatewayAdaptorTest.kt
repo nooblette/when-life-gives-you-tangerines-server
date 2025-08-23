@@ -3,7 +3,6 @@ package com.tangerine.api.payment.port
 import com.tangerine.api.payment.client.exception.ApiCallException
 import com.tangerine.api.payment.client.toss.TossPaymentApiClient
 import com.tangerine.api.payment.client.toss.exception.TossPaymentException
-import com.tangerine.api.payment.client.toss.response.TossPayment
 import com.tangerine.api.payment.fixture.client.toss.response.tossPayment
 import com.tangerine.api.payment.request.ApprovePaymentRequest
 import com.tangerine.api.payment.response.ApprovePaymentResponse
@@ -44,18 +43,20 @@ class TossPaymentGatewayAdaptorTest {
     @Test
     fun `결제 승인 성공시 Success 응답을 반환한다`() {
         // given
-        val tossPayment = tossPayment()
+        val expectedResponse = tossPayment()
         `when`(
             tossPaymentApiClient.confirmPayment(any(), any()),
-        ).thenReturn(tossPayment)
+        ).thenReturn(expectedResponse)
 
         // when
-        val response = tossPaymentGatewayAdaptor.approve(request)
+        val actualResponse = tossPaymentGatewayAdaptor.approve(request)
 
         // then
-        response.shouldBeInstanceOf<ApprovePaymentResponse.Success<TossPayment>>()
-        response.paymentKey shouldBe request.paymentKey
-        response.data shouldBe tossPayment
+        actualResponse.shouldBeInstanceOf<ApprovePaymentResponse.Success>()
+        actualResponse.paymentKey shouldBe request.paymentKey
+        actualResponse.orderName shouldBe expectedResponse.orderName
+        actualResponse.requestAt shouldBe expectedResponse.requestedAt
+        actualResponse.approvedAt shouldBe expectedResponse.approvedAt
     }
 
     @Test

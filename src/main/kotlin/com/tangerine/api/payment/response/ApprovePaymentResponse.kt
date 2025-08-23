@@ -1,11 +1,15 @@
 package com.tangerine.api.payment.response
 
+import java.time.LocalDateTime
+
 sealed class ApprovePaymentResponse(
     open val paymentKey: String,
 ) {
-    data class Success<T>(
+    data class Success(
         override val paymentKey: String,
-        val data: T,
+        val orderName: String,
+        val requestAt: LocalDateTime,
+        val approvedAt: LocalDateTime,
     ) : ApprovePaymentResponse(paymentKey = paymentKey)
 
     data class Failure(

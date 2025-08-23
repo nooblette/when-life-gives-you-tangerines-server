@@ -17,7 +17,7 @@ import com.tangerine.api.payment.fixture.command.matchesOrderCommand
 import com.tangerine.api.payment.fixture.entity.findPaymentEntityByOrderId
 import com.tangerine.api.payment.port.PaymentGatewayPort
 import com.tangerine.api.payment.request.ApprovePaymentRequest
-import com.tangerine.api.payment.response.ApprovePaymentResponse
+import com.tangerine.api.payment.response.success
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -110,10 +110,7 @@ class ApproveOrderPaymentUseCaseConcurrencyTest {
         whenever(
             paymentGatewayPort.approve(any()),
         ).thenReturn(
-            ApprovePaymentResponse.Success(
-                paymentKey = approvalCommand.paymentKey,
-                data = "Success",
-            ),
+            success(paymentKey = approvalCommand.paymentKey),
         )
 
         // when

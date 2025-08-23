@@ -3,12 +3,14 @@ package com.tangerine.api.payment.port
 import com.tangerine.api.payment.client.exception.ApiCallException
 import com.tangerine.api.payment.client.toss.TossPaymentApiClient
 import com.tangerine.api.payment.client.toss.exception.TossPaymentException
+import com.tangerine.api.payment.client.toss.response.TossPayment
 import com.tangerine.api.payment.mapper.toConfirmTossPaymentRequest
 import com.tangerine.api.payment.request.ApprovePaymentRequest
 import com.tangerine.api.payment.response.ApprovePaymentResponse
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 private val logger = KotlinLogging.logger {}
 
@@ -25,39 +27,53 @@ class TossPaymentGatewayAdaptor(
                 request = request.toConfirmTossPaymentRequest(),
             )
         }.fold(
-            onSuccess = { ApprovePaymentResponse.Success(paymentKey = request.paymentKey, data = it) },
-            onFailure = { exception -> failureHandler(paymentKey = request.paymentKey, exception = exception) },
+            onSuccess = { successHandler(paymentKey = request.paymentKey, responseData = it) },
+            onFailure = { failureHandler(paymentKey = request.paymentKey, exception = it) },
         )
+
+    private fun successHandler(
+        paymentKey: String,
+        responseData: TossPayment,
+    ): ApprovePaymentResponse {
+        logger.info("토스페이먼츠 결제 승인 성공 $responseData")
+        return ApprovePaymentResponse.Success(
+            paymentKey = paymentKey,
+            orderName = responseData.orderName,
+            requestAt = responseData.requestedAt,
+            approvedAt = responseData.approvedAt ?: LocalDateTime.now(),
+        )
+    }
 
     private fun failureHandler(
         paymentKey: String,
         exception: Throwable,
-    ) = when (exception) {
-        is TossPaymentException -> {
-            logger.error(
-                "토스페이먼츠 결제 승인 API call failed " +
-                    "(${exception.httpStatus.value()} ${exception.httpStatus.reasonPhrase}): " +
-                    "${exception.code}(${exception.message})",
-            )
-            ApprovePaymentResponse.Failure(
-                paymentKey = paymentKey,
-                code = exception.code,
-                message = exception.message,
-            )
-        }
+    ): ApprovePaymentResponse =
+        when (exception) {
+            is TossPaymentException -> {
+                logger.error(
+                    "토스페이먼츠 결제 승인 API call failed " +
+                        "(${exception.httpStatus.value()} ${exception.httpStatus.reasonPhrase}): " +
+                        "${exception.code}(${exception.message})",
+                )
+                ApprovePaymentResponse.Failure(
+                    paymentKey = paymentKey,
+                    code = exception.code,
+                    message = exception.message,
+                )
+            }
 
-        is ApiCallException -> {
-            logger.error(
-                "API call failed " +
-                    "(${exception.httpStatus.value()} ${exception.httpStatus.reasonPhrase}): " +
-                    "${ApiCallException.buildMessage(httpStatus = exception.httpStatus)})",
-            )
-            ApprovePaymentResponse.Failure.apiCallError(
-                paymentKey = paymentKey,
-                message = exception.message,
-            )
-        }
+            is ApiCallException -> {
+                logger.error(
+                    "API call failed " +
+                        "(${exception.httpStatus.value()} ${exception.httpStatus.reasonPhrase}): " +
+                        "${ApiCallException.buildMessage(httpStatus = exception.httpStatus)})",
+                )
+                ApprovePaymentResponse.Failure.apiCallError(
+                    paymentKey = paymentKey,
+                    message = exception.message,
+                )
+            }
 
-        else -> ApprovePaymentResponse.Failure.unknownError(paymentKey)
-    }
+            else -> ApprovePaymentResponse.Failure.unknownError(paymentKey)
+        }
 }

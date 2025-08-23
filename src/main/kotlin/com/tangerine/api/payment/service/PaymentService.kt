@@ -28,9 +28,16 @@ class PaymentService(
 
         // 결제 승인 API 호출
         return when (val paymentResponse = paymentGatewayPort.approve(request = command.toApprovePaymentRequest())) {
-            is ApprovePaymentResponse.Success<*> -> {
-                paymentStateService.changeToCompleted(paymentEntity = paymentEntity)
+            is ApprovePaymentResponse.Success -> {
+                paymentStateService.changeToCompleted(
+                    paymentEntity = paymentEntity,
+                    orderName = paymentResponse.orderName,
+                    requestAt = paymentResponse.requestAt,
+                    approvedAt = paymentResponse.approvedAt,
+                )
                 logger.info { "$command 결제 성공" }
+
+                // TODO Mapper 호출
                 ApprovePaymentResult.Success(paymentKey = paymentResponse.paymentKey)
             }
 
@@ -41,6 +48,8 @@ class PaymentService(
                     failReason = paymentResponse.message,
                 )
                 logger.info { "$command 결제 실패" }
+
+                // TODO Mapper 호출
                 ApprovePaymentResult.Failure(
                     paymentKey = paymentResponse.paymentKey,
                     code = paymentResponse.code,
