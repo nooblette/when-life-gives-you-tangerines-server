@@ -16,5 +16,8 @@ class OrderQueryController(
     @GetMapping("/{orderId}")
     fun getOrderById(
         @PathVariable orderId: String,
-    ): OrderResponse = orderQueryService.getOrderByOrderId(orderId).toResponse()
+    ): OrderResponse =
+        orderQueryService
+            .getOrderByOrderId(orderId)
+            .toResponse()
 }
