@@ -1,4 +1,4 @@
-package com.tangerine.api.order.fixture.domain
+package com.tangerine.api.order.fixture.command
 
 import com.tangerine.api.order.command.ApproveOrderPaymentCommand
 import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator

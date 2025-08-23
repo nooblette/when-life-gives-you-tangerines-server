@@ -4,7 +4,7 @@ import com.tangerine.api.order.command.PlaceOrderCommand
 import com.tangerine.api.order.domain.OrderItem
 import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity
-import com.tangerine.api.order.fixture.domain.createPlaceOrderCommand
+import com.tangerine.api.order.fixture.command.createPlaceOrderCommand
 import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator
 import com.tangerine.api.order.mapper.toDomain
 import com.tangerine.api.order.mapper.toDomains

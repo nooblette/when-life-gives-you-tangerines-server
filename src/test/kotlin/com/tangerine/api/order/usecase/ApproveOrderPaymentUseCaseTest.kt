@@ -4,7 +4,7 @@ import com.tangerine.api.order.command.ApproveOrderPaymentCommand
 import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.entity.OrderEntity
 import com.tangerine.api.order.entity.OrderItemEntity
-import com.tangerine.api.order.fixture.domain.createApproveOrderPaymentCommand
+import com.tangerine.api.order.fixture.command.createApproveOrderPaymentCommand
 import com.tangerine.api.order.fixture.entity.createOrderEntity
 import com.tangerine.api.order.fixture.entity.createOrderItemEntity
 import com.tangerine.api.order.policy.OrderPaymentApprovalPolicy
