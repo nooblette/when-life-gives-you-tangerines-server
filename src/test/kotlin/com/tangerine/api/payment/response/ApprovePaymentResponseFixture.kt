@@ -3,11 +3,17 @@ package com.tangerine.api.payment.response
 import com.tangerine.api.payment.domain.PaymentGateway.TOSS
 import java.time.LocalDateTime
 
-fun success(paymentKey: String): ApprovePaymentResponse.Success =
+fun success(
+    orderId: String,
+    paymentKey: String,
+): ApprovePaymentResponse.Success =
     ApprovePaymentResponse.Success(
         paymentKey = paymentKey,
         paymentGateway = TOSS,
+        paymentMethod = "CARD",
+        orderId = orderId,
         orderName = "제주 감귤 10kg 1개 외 2건",
+        totalAmount = 32000,
         requestedAt = LocalDateTime.now(),
         approvedAt = LocalDateTime.now(),
     )

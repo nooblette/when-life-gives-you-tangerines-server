@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActionsDsl
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.result.StatusResultMatchersDsl
+import java.time.LocalDateTime
 
 @WebMvcTest(OrderPaymentApprovalController::class)
 class OrderPaymentApprovalControllerTest {
@@ -105,7 +106,17 @@ class OrderPaymentApprovalControllerTest {
                 .withDefaultOrderPaymentApprovalRequest()
                 .build()
         whenever(approveOrderPaymentUseCase.approve(any()))
-            .thenReturn(ApproveOrderPaymentResult.Success())
+            .thenReturn(
+                ApproveOrderPaymentResult.Success(
+                    orderId = TestOrderIdGenerator.STUB_ORDER_ID,
+                    orderName = "테스트 주문",
+                    paymentKey = "TEST",
+                    paymentMethod = "CARD",
+                    totalAmount = 32000,
+                    requestedAt = LocalDateTime.now(),
+                    approvedAt = LocalDateTime.now(),
+                ),
+            )
 
         // when & then
         performOrderRequest(requestOrder)

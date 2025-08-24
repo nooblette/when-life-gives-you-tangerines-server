@@ -1,12 +1,9 @@
 package com.tangerine.api.order.controller
 
-import com.tangerine.api.global.response.ApiResult
-import com.tangerine.api.global.response.Error
-import com.tangerine.api.global.response.Success
-import com.tangerine.api.global.response.toResponseEntity
 import com.tangerine.api.order.api.request.ApproveOrderPaymentRequest
+import com.tangerine.api.order.api.response.ApproveOrderPaymentResponse
 import com.tangerine.api.order.mapper.toApproveOrderPaymentCommand
-import com.tangerine.api.order.result.ApproveOrderPaymentResult
+import com.tangerine.api.order.mapper.toResponse
 import com.tangerine.api.order.usecase.ApproveOrderPaymentUseCase
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -25,15 +22,15 @@ class OrderPaymentApprovalController(
     fun approve(
         @PathVariable orderId: String,
         @RequestBody @Valid request: ApproveOrderPaymentRequest,
-    ): ResponseEntity<out ApiResult<String>> =
-        approveOrderPaymentUseCase
-            .approve(request.toApproveOrderPaymentCommand(orderId = orderId))
-            .toApiResult()
-            .toResponseEntity()
+    ): ResponseEntity<ApproveOrderPaymentResponse> {
+        val response =
+            approveOrderPaymentUseCase
+                .approve(request.toApproveOrderPaymentCommand(orderId = orderId))
+                .toResponse()
 
-    private fun ApproveOrderPaymentResult.toApiResult(): ApiResult<String> =
-        when (this) {
-            is ApproveOrderPaymentResult.Failure -> Error(message = this.message, code = this.code)
-            is ApproveOrderPaymentResult.Success -> Success(data = this.message)
+        return when (response) {
+            is ApproveOrderPaymentResponse.Success -> ResponseEntity.ok(response)
+            is ApproveOrderPaymentResponse.Failure -> ResponseEntity.badRequest().body(response)
         }
+    }
 }

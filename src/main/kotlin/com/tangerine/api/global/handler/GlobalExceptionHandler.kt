@@ -1,10 +1,8 @@
 package com.tangerine.api.global.handler
 
 import com.fasterxml.jackson.databind.JsonMappingException
-import com.tangerine.api.global.response.Error
+import com.tangerine.api.global.response.ApiResponse
 import com.tangerine.api.global.response.ErrorCodes
-import com.tangerine.api.global.response.ValidationError
-import com.tangerine.api.global.response.ValidationErrorResponse
 import com.tangerine.api.order.exception.OrderAlreadyInProgressException
 import com.tangerine.api.order.result.EvaluateOrderPaymentResult.InProgressOrder
 import org.springframework.http.HttpStatus
@@ -17,17 +15,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 @RestControllerAdvice
 class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleMethodArgumentNotValidException(exception: MethodArgumentNotValidException): ResponseEntity<Error> {
+    fun handleMethodArgumentNotValidException(exception: MethodArgumentNotValidException): ResponseEntity<ApiResponse.Error> {
         val errors =
             exception.bindingResult.fieldErrors.map { fieldError ->
-                ValidationError(
+                ApiResponse.ValidationError(
                     field = fieldError.field,
                     message = fieldError.defaultMessage ?: "Invalid value",
                 )
             }
 
         return ResponseEntity(
-            ValidationErrorResponse(
+            ApiResponse.ValidationErrorResponse(
                 message = "유효성 검사에 실패했습니다.",
                 code = ErrorCodes.INVALID_ARGUMENT,
                 errors = errors,
@@ -37,7 +35,7 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
-    fun handleHttpMessageNotReadable(exception: HttpMessageNotReadableException): ResponseEntity<ValidationErrorResponse> {
+    fun handleHttpMessageNotReadable(exception: HttpMessageNotReadableException): ResponseEntity<ApiResponse.ValidationErrorResponse> {
         // 내부 원인이 JsonMappingException 예외인 경우만 처리
         // 필수 파라미터 누락으로 코틀린 객체 생성 실패시 발생하는 MissingKotlinParameterException 예외도 JsonMappingException 예외를 상속
         val mappingEx = exception.cause as? JsonMappingException
@@ -51,13 +49,13 @@ class GlobalExceptionHandler {
 
         // 누락된 필드로 에러 응답1
         val error =
-            ValidationError(
+            ApiResponse.ValidationError(
                 field = fieldName,
                 message = "${fieldName}는 필수 값입니다.",
             )
 
         return ResponseEntity(
-            ValidationErrorResponse(
+            ApiResponse.ValidationErrorResponse(
                 message = "필수 요청 파라미터가 누락되었습니다.",
                 code = ErrorCodes.MISSING_FIELD,
                 errors = listOf(error),
@@ -83,9 +81,9 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException::class)
-    fun handlerIllegalArgumentException(exception: IllegalArgumentException): ResponseEntity<Error> =
+    fun handlerIllegalArgumentException(exception: IllegalArgumentException): ResponseEntity<ApiResponse.Error> =
         ResponseEntity(
-            Error(
+            ApiResponse.Error(
                 message = exception.message ?: "잘못된 요청입니다.",
                 code = ErrorCodes.INVALID_ARGUMENT,
             ),
@@ -93,9 +91,9 @@ class GlobalExceptionHandler {
         )
 
     @ExceptionHandler(OrderAlreadyInProgressException::class)
-    fun handleOrderAlreadyInProgressException(exception: OrderAlreadyInProgressException): ResponseEntity<Error> =
+    fun handleOrderAlreadyInProgressException(exception: OrderAlreadyInProgressException): ResponseEntity<ApiResponse.Error> =
         ResponseEntity(
-            Error(
+            ApiResponse.Error(
                 message = InProgressOrder().message,
                 code = InProgressOrder().code,
             ),

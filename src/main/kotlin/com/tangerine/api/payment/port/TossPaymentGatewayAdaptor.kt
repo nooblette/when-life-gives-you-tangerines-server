@@ -40,7 +40,10 @@ class TossPaymentGatewayAdaptor(
         return ApprovePaymentResponse.Success(
             paymentKey = paymentKey,
             paymentGateway = TOSS,
+            paymentMethod = responseData.method?.toString() ?: "UNKNOWN",
+            orderId = responseData.orderId,
             orderName = responseData.orderName,
+            totalAmount = responseData.totalAmount,
             requestedAt = responseData.requestedAt,
             approvedAt = responseData.approvedAt ?: LocalDateTime.now(),
         )

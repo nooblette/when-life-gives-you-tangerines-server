@@ -40,7 +40,11 @@ class PaymentServiceTest {
     @Test
     fun `결제 성공시 PaymentEntity 상태를 COMPLETED로 변경, requestedAt와 approvedAt를 업데이트한다`() {
         // given
-        val expectedResponse = success(paymentKey = approvePaymentCommand.paymentKey)
+        val expectedResponse =
+            success(
+                orderId = approvePaymentCommand.orderId,
+                paymentKey = approvePaymentCommand.paymentKey,
+            )
         whenever(
             paymentGatewayPort.approve(any()),
         ).thenReturn(

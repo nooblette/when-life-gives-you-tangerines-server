@@ -110,7 +110,10 @@ class ApproveOrderPaymentUseCaseConcurrencyTest {
         whenever(
             paymentGatewayPort.approve(any()),
         ).thenReturn(
-            success(paymentKey = approvalCommand.paymentKey),
+            success(
+                orderId = approvalCommand.orderId,
+                paymentKey = approvalCommand.paymentKey,
+            ),
         )
 
         // when

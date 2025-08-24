@@ -10,7 +10,10 @@ sealed class ApprovePaymentResponse(
     data class Success(
         override val paymentKey: String,
         override val paymentGateway: PaymentGateway,
+        val paymentMethod: String,
+        val orderId: String,
         val orderName: String,
+        val totalAmount: Int,
         val requestedAt: LocalDateTime,
         val approvedAt: LocalDateTime,
     ) : ApprovePaymentResponse(paymentKey = paymentKey, paymentGateway = paymentGateway)
