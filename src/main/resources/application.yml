@@ -23,7 +23,13 @@ spring:
       fail-on-null-for-primitives: true
 logging:
   level:
-    org.hibernate.orm.jdbc.bind: TRACE  # 파라미터 바인딩 값까지 출력
+    # FeignClient 로깅
+    com.tangerine.api.payment.client.toss: DEBUG
 toss_payment:
   base_url: http://localhost:8089
   secret_key: dummy_key
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: full
