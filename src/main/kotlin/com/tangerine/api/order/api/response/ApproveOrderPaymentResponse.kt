@@ -1,5 +1,7 @@
 package com.tangerine.api.order.api.response
 
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import java.time.LocalDateTime
 
 sealed interface ApproveOrderPaymentResponse {
@@ -13,9 +15,14 @@ sealed interface ApproveOrderPaymentResponse {
         val message: String,
     ) : ApproveOrderPaymentResponse
 
-    data class
-    Failure(
+    data class Failure(
         val code: String,
         val message: String,
-    ) : ApproveOrderPaymentResponse
+    ) : ApproveOrderPaymentResponse {
+        fun toResponseEntity(): ResponseEntity<ApproveOrderPaymentResponse> =
+            when (code) {
+                "UNAUTHORIZED_KEY" -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(this)
+                else -> ResponseEntity.badRequest().body(this)
+            }
+    }
 }

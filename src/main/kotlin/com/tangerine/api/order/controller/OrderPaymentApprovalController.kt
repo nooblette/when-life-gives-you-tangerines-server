@@ -30,7 +30,7 @@ class OrderPaymentApprovalController(
 
         return when (response) {
             is ApproveOrderPaymentResponse.Success -> ResponseEntity.ok(response)
-            is ApproveOrderPaymentResponse.Failure -> ResponseEntity.badRequest().body(response)
+            is ApproveOrderPaymentResponse.Failure -> response.toResponseEntity()
         }
     }
 }
