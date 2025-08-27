@@ -12,6 +12,7 @@ import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.util.Base64
 
 private val logger = KotlinLogging.logger {}
 
@@ -23,8 +24,9 @@ class TossPaymentGatewayAdaptor(
 ) : PaymentGatewayPort {
     override fun approve(request: ApprovePaymentRequest): ApprovePaymentResponse =
         runCatching {
+            logger.info("Payment(PaymentKey = ${request.paymentKey}) 토스페이먼츠 결제 요청 $request")
             tossPaymentApiClient.confirmPayment(
-                authorization = secretKey,
+                authorization = "Basic ${Base64.getEncoder().encodeToString("$secretKey:".toByteArray())}",
                 request = request.toConfirmTossPaymentRequest(),
             )
         }.fold(
