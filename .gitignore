@@ -5,3 +5,6 @@
 # IntelliJ IDEA
 .idea/
 *.iml
+
+# Ignore Spring Boot environment-specific configuration files
+application-*.yml

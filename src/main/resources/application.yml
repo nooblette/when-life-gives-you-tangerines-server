@@ -1,28 +1,26 @@
 spring:
   application:
     name: api
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
   jpa:
-    open-in-view: false  #  View 렌더링 시점까지 영속성 컨텍스트를 열어두지 않음
-    show-sql: true  # 실행되는 SQL 출력
+    # View 렌더링 시점까지 영속성 컨텍스트를 열어두지 않음
+    open-in-view: false
+    # 실행되는 SQL 출력
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
-        use_sql_comments: true  # 실행되는 SQL 설명 출력
+        # 실행되는 SQL 설명 출력
+        use_sql_comments: true
   jackson:
     deserialization:
-      #  Primitive 타입(Int, Long)으로 정의된 필드에 JSON 값이 null이 들어오면 MismatchedInputException 발생
+      # Primitive 타입(Int, Long)으로 정의된 필드에 JSON 값이 null이 들어오면 MismatchedInputException 발생
       fail-on-null-for-primitives: true
 logging:
   level:
+    # JPA/Hibernate SQL 로깅
+    org.hibernate.SQL: DEBUG
+    # 파라미터 바인딩 값 출력
+    org.hibernate.orm.jdbc.bind: TRACE
     # FeignClient 로깅
     com.tangerine.api.payment.client.toss: DEBUG
 toss_payment:
