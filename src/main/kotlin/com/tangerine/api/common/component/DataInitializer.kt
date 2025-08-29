@@ -17,8 +17,8 @@ class DataInitializer(
         if (itemRepository.count() == 0L) {
             itemRepository.saveAll(
                 listOf(
-                    ItemEntity(name = "제주 노지 감귤 (10~15개입)", quantity = 10, unit = KG, price = 12000),
-                    ItemEntity(name = "제주 노지 감귤 (20~25개입)", quantity = 15, unit = KG, price = 20000),
+                    ItemEntity(name = "제주 노지 감귤 (10~15개입)", quantity = 10, unit = KG, price = 12000, stock = 100),
+                    ItemEntity(name = "제주 노지 감귤 (20~25개입)", quantity = 15, unit = KG, price = 20000, stock = 100),
                 ),
             )
         }

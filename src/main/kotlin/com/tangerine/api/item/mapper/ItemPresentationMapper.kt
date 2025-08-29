@@ -12,4 +12,5 @@ private fun Item.toResponse(): ItemResponse =
         quantity = quantity,
         unit = unit,
         price = price,
+        stock = stock,
     )

@@ -24,4 +24,6 @@ class ItemEntity(
     val unit: UnitType, // 개입, kg 등
     @Column(nullable = false)
     val price: Int,
+    @Column(nullable = false)
+    val stock: Int,
 )

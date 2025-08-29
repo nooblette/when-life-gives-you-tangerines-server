@@ -29,5 +29,6 @@ object ItemDomainFixture {
             price = price,
             unit = unit,
             quantity = quantity,
+            stock = 10,
         )
 }

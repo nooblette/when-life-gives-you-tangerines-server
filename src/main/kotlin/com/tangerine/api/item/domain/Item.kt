@@ -8,4 +8,5 @@ data class Item(
     val quantity: Int, // 수량 or 무게 수치
     val unit: UnitType, // 개입, kg 등
     val price: Int,
+    val stock: Int,
 )

@@ -12,4 +12,5 @@ fun ItemEntity.toDomain(): Item =
         quantity = quantity,
         unit = unit,
         price = price,
+        stock = stock,
     )

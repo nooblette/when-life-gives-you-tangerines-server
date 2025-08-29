@@ -7,6 +7,7 @@ data class ItemResponse(
     val name: String,
     val weight: String,
     val price: Int,
+    val stock: Int,
 ) {
     companion object {
         fun of(
@@ -15,6 +16,7 @@ data class ItemResponse(
             quantity: Int,
             unit: UnitType,
             price: Int,
-        ): ItemResponse = ItemResponse(id, name, quantity.toString() + unit, price)
+            stock: Int,
+        ): ItemResponse = ItemResponse(id, name, quantity.toString() + unit, price, stock)
     }
 }
