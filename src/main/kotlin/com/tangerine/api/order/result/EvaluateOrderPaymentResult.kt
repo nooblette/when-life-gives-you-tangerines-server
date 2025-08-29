@@ -18,7 +18,7 @@ sealed class EvaluateOrderPaymentResult(
     ) : Failure(message = message, code = code)
 
     data class CompletedOrder(
-        override val message: String = "완료된 주문입니다.",
+        override val message: String = "이미 결제 완료된 주문입니다.",
         override val code: String = "COMPLETED_ORDER",
     ) : Failure(message = message, code = code)
 
