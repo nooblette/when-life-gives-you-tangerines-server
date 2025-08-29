@@ -8,7 +8,8 @@ fun createOrderEntity(
 ): OrderEntity =
     OrderEntity(
         orderId = orderId,
-        name = "user 1",
+        orderName = "테스트 주문",
+        customerName = "user 1",
         recipient = "user 1",
         phone = "01012345678",
         address = "서울특별시 중구",

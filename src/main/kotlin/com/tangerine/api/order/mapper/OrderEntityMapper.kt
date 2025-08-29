@@ -10,7 +10,8 @@ import com.tangerine.api.order.entity.OrderItemEntity
 fun PlaceOrderCommand.toEntity(orderId: String) =
     OrderEntity(
         orderId = orderId,
-        name = customer.name,
+        orderName = orderName,
+        customerName = customer.name,
         recipient = customer.recipient,
         phone = customer.phone,
         address = customer.address,
@@ -41,7 +42,7 @@ fun OrderEntity.toDomain(items: List<OrderItem>) =
 
 private fun OrderEntity.toPurchaser() =
     Customer.purchaser(
-        name = name,
+        name = customerName,
         recipient = recipient,
         phone = phone,
         address = address,

@@ -18,6 +18,7 @@ fun PlaceOrderRequest.toPlaceOrderCommand(): PlaceOrderCommand =
         customer = customer.toDomain(),
         items = items.map(OrderItemRequest::toDomain),
         totalAmount = totalAmount,
+        orderName = orderName,
     )
 
 fun CustomerRequest.toDomain(): Customer =

@@ -7,4 +7,5 @@ data class PlaceOrderCommand(
     val customer: Customer,
     val items: List<OrderItem>,
     val totalAmount: Int,
+    val orderName: String,
 )

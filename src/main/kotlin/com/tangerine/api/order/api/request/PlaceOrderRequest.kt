@@ -13,6 +13,8 @@ data class PlaceOrderRequest(
     val items: List<OrderItemRequest>,
     @field:Min(0, message = "주문금액은 음수(-)일 수 없습니다.")
     val totalAmount: Int,
+    @field:Valid
+    val orderName: String,
 )
 
 data class CustomerRequest(

@@ -11,5 +11,6 @@ fun createPlaceOrderCommand(): PlaceOrderCommand {
         customer = createCustomer(),
         items = testOrderItems,
         totalAmount = testOrderItems.sumOf { it.price * it.quantity },
+        orderName = "테스트 주문",
     )
 }

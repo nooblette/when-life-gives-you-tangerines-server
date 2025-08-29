@@ -59,8 +59,10 @@ class OrderCommandServiceTest {
     }
 
     private fun assertPlacementOrder(actualOrder: OrderEntity) {
-        actualOrder.status shouldBe OrderStatus.INIT // 주문 생성시 초기 상태는 INIT
-        actualOrder.name shouldBe newOrder.customer.name
+        // 주문 생성시 초기 상태는 INIT
+        actualOrder.status shouldBe OrderStatus.INIT
+        actualOrder.orderId shouldBe newOrder.orderName
+        actualOrder.customerName shouldBe newOrder.customer.name
         actualOrder.recipient shouldBe newOrder.customer.recipient
         actualOrder.phone shouldBe newOrder.customer.phone
         actualOrder.address shouldBe newOrder.customer.address

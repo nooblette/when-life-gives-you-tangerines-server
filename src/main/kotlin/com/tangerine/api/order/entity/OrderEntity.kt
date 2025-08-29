@@ -22,8 +22,9 @@ class OrderEntity(
     var version: Long = 0,
     @Column(nullable = false, unique = true)
     val orderId: String,
+    val orderName: String?,
     @Column(nullable = false)
-    val name: String,
+    val customerName: String,
     @Column(nullable = false)
     val recipient: String,
     @Column(nullable = false)

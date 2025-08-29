@@ -39,6 +39,7 @@ class OrderRequestBuilder {
             customer = defaultCustomer,
             items = defaultItems,
             totalAmount = defaultTotalAmount,
+            orderName = "테스트 주문",
         )
 
     fun withCustomerNameBlank() =

@@ -50,6 +50,12 @@ class JsonOrderRequestBuilder {
             root.put("totalAmount", 39000)
         }
 
+    // 필수 orderName 세팅
+    fun withDefaultOrderName() =
+        apply {
+            root.put("orderName", "테스트 주문")
+        }
+
     // customer 키 전체를 제거
     fun withoutCustomer() =
         apply {

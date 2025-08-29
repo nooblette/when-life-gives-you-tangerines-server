@@ -160,6 +160,7 @@ class OrderCommandControllerTest {
                 .withDefaultCustomer()
                 .withDefaultItems()
                 .withDefaultTotalAmount()
+                .withDefaultOrderName()
                 .build()
 
         // then
