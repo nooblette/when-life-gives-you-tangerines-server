@@ -80,8 +80,8 @@ class TossPaymentApiClientTest {
                 "totalAmount": 15000,
                 "balanceAmount": 15000,
                 "status": "DONE",
-                "requestedAt": "2023-01-01T00:00:00",
-                "approvedAt": "2023-01-01T00:00:00",
+                "requestedAt": "2025-08-29T20:49:40+09:00",
+                "approvedAt": "2025-08-29T20:50:01+09:00",
                 "useEscrow": false,
                 "lastTransactionKey": null,
                 "suppliedAmount": 13636,
@@ -182,9 +182,9 @@ class TossPaymentApiClientTest {
 
     private fun createAuthorizationValue(): String =
         "Basic ${
-        String(
-            Base64.getEncoder().encode("$secretKey:".toByteArray(StandardCharsets.UTF_8)),
-        )
+            String(
+                Base64.getEncoder().encode("$secretKey:".toByteArray(StandardCharsets.UTF_8)),
+            )
         }"
 
     private fun stubWireMockServer(

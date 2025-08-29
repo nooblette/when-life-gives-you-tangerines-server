@@ -26,8 +26,5 @@ logging:
 toss_payment:
   base_url: http://localhost:8089
   secret_key: dummy_key
-feign:
-  client:
-    config:
-      default:
-        loggerLevel: full
+cors:
+  allowed-origins: http://localhost:3000
