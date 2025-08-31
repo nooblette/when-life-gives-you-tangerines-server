@@ -5,7 +5,7 @@ import com.tangerine.api.order.fixture.builder.JsonOrderRequestBuilder
 import com.tangerine.api.order.fixture.builder.OrderRequestBuilder
 import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator
 import com.tangerine.api.order.result.PlaceOrderResult
-import com.tangerine.api.order.service.OrderCommandService
+import com.tangerine.api.order.usecase.OrderPlaceUseCase
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
@@ -23,7 +23,7 @@ class OrderCommandControllerTest {
     lateinit var mockMvc: MockMvc
 
     @MockitoBean
-    lateinit var orderCommandService: OrderCommandService
+    lateinit var orderPlaceUseCase: OrderPlaceUseCase
 
     @Test
     fun `주문 요청 중 주문 정보 고객 필드가 누락되면 400에러를 반환한다`() {
@@ -151,7 +151,7 @@ class OrderCommandControllerTest {
     fun `주문 요청 성공 테스트`() {
         // given
         val orderId = TestOrderIdGenerator.STUB_ORDER_ID
-        whenever(orderCommandService.place(any()))
+        whenever(orderPlaceUseCase.place(any()))
             .thenReturn(PlaceOrderResult.Success(orderId))
 
         // when

@@ -25,5 +25,5 @@ class ItemEntity(
     @Column(nullable = false)
     val price: Int,
     @Column(nullable = false)
-    val stock: Int,
+    var stock: Int,
 )

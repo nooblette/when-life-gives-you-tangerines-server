@@ -5,4 +5,6 @@ data class OrderItem(
     val name: String,
     val price: Int,
     val quantity: Int,
-)
+) {
+    fun exceedsStock(availableStock: Int): Boolean = this.quantity > availableStock
+}
