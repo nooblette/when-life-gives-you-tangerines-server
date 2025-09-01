@@ -1,6 +1,7 @@
 package com.tangerine.api.order.controller
 
 import com.tangerine.api.global.response.ErrorCodes
+import com.tangerine.api.item.exception.StockConflictException
 import com.tangerine.api.order.fixture.builder.JsonOrderRequestBuilder
 import com.tangerine.api.order.fixture.builder.OrderRequestBuilder
 import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator
@@ -16,6 +17,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActionsDsl
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.result.StatusResultMatchersDsl
 
 @WebMvcTest(OrderCommandController::class)
 class OrderCommandControllerTest {
@@ -148,6 +150,27 @@ class OrderCommandControllerTest {
     }
 
     @Test
+    fun `동일한 상품에 대해 동시에 재고를 차감하는 경우 409에러를 반환한다`() {
+        // when
+        val requestOrder =
+            JsonOrderRequestBuilder()
+                .withDefaultCustomer()
+                .withDefaultItems()
+                .withDefaultTotalAmount()
+                .withDefaultOrderName()
+                .build()
+        whenever(orderPlaceUseCase.place(any()))
+            .thenThrow(StockConflictException(message = "잠시 후 다시 시도해주세요."))
+
+        // then
+        performOrderRequest(requestOrder)
+            .assertResponseCode(
+                expectedStatus = { isConflict() },
+                expectedErrorCode = ErrorCodes.CONFLICT,
+            )
+    }
+
+    @Test
     fun `주문 요청 성공 테스트`() {
         // given
         val orderId = TestOrderIdGenerator.STUB_ORDER_ID
@@ -181,13 +204,17 @@ class OrderCommandControllerTest {
         }
 
     // 응답 및 에러 코드 검증
-    private fun ResultActionsDsl.assertResponseCode(errorCode: String) {
+    private fun ResultActionsDsl.assertResponseCode(
+        expectedErrorCode: String,
+        expectedStatus: StatusResultMatchersDsl.() -> Unit = { isBadRequest() },
+    ) {
         this
             .andDo {
-                print() // 요청/응답 전체를 콘솔에 출력
+                // 요청/응답 전체를 콘솔에 출력
+                print()
             }.andExpect {
-                status { isBadRequest() }
-                jsonPath("$.code") { value(errorCode) }
+                status(expectedStatus)
+                jsonPath("$.code") { value(expectedErrorCode) }
             }
     }
 

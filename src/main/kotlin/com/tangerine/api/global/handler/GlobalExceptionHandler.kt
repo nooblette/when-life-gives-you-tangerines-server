@@ -1,6 +1,7 @@
 package com.tangerine.api.global.handler
 
 import com.fasterxml.jackson.databind.JsonMappingException
+import com.tangerine.api.common.exception.ResourceConflictException
 import com.tangerine.api.global.response.ApiResponse
 import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.order.exception.OrderAlreadyInProgressException
@@ -90,13 +91,26 @@ class GlobalExceptionHandler {
             HttpStatus.BAD_REQUEST,
         )
 
-    @ExceptionHandler(OrderAlreadyInProgressException::class)
-    fun handleOrderAlreadyInProgressException(exception: OrderAlreadyInProgressException): ResponseEntity<ApiResponse.Error> =
+    @ExceptionHandler(ResourceConflictException::class)
+    fun handleResourceConflictException(exception: ResourceConflictException): ResponseEntity<ApiResponse.Error> =
         ResponseEntity(
-            ApiResponse.Error(
-                message = InProgressOrder().message,
-                code = InProgressOrder().code,
-            ),
+            createConflictResponseBody(exception = exception),
             HttpStatus.CONFLICT,
         )
+
+    private fun createConflictResponseBody(exception: ResourceConflictException) =
+        when (exception) {
+            is OrderAlreadyInProgressException ->
+                ApiResponse.Error(
+                    message = InProgressOrder().message,
+                    code = InProgressOrder().code,
+                )
+
+            else -> {
+                ApiResponse.Error(
+                    message = exception.message,
+                    code = exception.code,
+                )
+            }
+        }
 }
