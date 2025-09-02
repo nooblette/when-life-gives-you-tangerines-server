@@ -23,16 +23,15 @@ class ItemStockService(
     }
 
     private fun decreaseStock(orderItem: OrderItem): DecreaseStockResult {
-        val item =
-            itemRepository
-                .findById(orderItem.id)
-                .orElseThrow { IllegalArgumentException("잘못된 상품 Id 입니다.") }
+        val itemEntity =
+            itemRepository.findByIdWithPessimisticLock(orderItem.id)
+                ?: throw IllegalArgumentException("잘못된 상품 Id(Id = ${orderItem.id}) 입니다.")
 
-        if (orderItem.exceedsStock(item.stock)) {
-            return DecreaseStockResult.Failure(message = generateFailureReason(item.stock))
+        if (orderItem.exceedsStock(itemEntity.stock)) {
+            return DecreaseStockResult.Failure(message = generateFailureReason(itemEntity.stock))
         }
 
-        item.stock -= orderItem.quantity
+        itemEntity.stock -= orderItem.quantity
         return DecreaseStockResult.Success
     }
 

@@ -1,5 +1,7 @@
 package com.tangerine.api.item.service
 
+import com.tangerine.api.fixture.concurrency.TaskResult
+import com.tangerine.api.fixture.concurrency.submitConcurrencyTask
 import com.tangerine.api.item.entity.ItemEntity
 import com.tangerine.api.item.fixture.entity.createItemEntity
 import com.tangerine.api.item.repository.ItemRepository
@@ -89,6 +91,43 @@ class ItemStockServiceTest {
         // 재고 수량 차감 검증
         val updatedItem = itemRepository.findById(orderItem.id).get()
         updatedItem.stock shouldBe STOCK - orderQuantity
+    }
+
+    @Test
+    fun `동일 상품에 동시 재고 차감 요청시 주문 수량만큼 재고가 정상 차감된다`() {
+        // given
+        val threadCount = STOCK + 5
+        val orderQuantity = 1
+        val orderItem =
+            createOrderItem(
+                itemEntity = itemEntity,
+                quantity = orderQuantity,
+            )
+
+        // when
+        val results =
+            submitConcurrencyTask(
+                task = itemStockService::decreaseStockByOrderItems,
+                request = listOf(orderItem),
+                threadCount = threadCount,
+            )
+
+        // then
+        results.forEach { result -> result.shouldBeInstanceOf<TaskResult.Success<*>>() }
+
+        val decreaseResults =
+            results
+                .filterIsInstance<TaskResult.Success<*>>()
+                .map { it.result as DecreaseStockResult }
+        val successCount = decreaseResults.count { it is DecreaseStockResult.Success }
+        val failureCount = decreaseResults.count { it is DecreaseStockResult.Failure }
+
+        // 비관적 락으로 순차 처리(동시성 제어) 10개는 성공, 나머지는 재고 부족으로 실패
+        successCount shouldBe STOCK
+        failureCount shouldBe threadCount - STOCK
+
+        val updatedItem = itemRepository.findById(orderItem.id).get()
+        updatedItem.stock shouldBe STOCK - successCount * orderQuantity
     }
 
     companion object {

@@ -1,5 +1,7 @@
 package com.tangerine.api.order.usecase
 
+import com.tangerine.api.fixture.concurrency.TaskResult
+import com.tangerine.api.fixture.concurrency.submitConcurrencyTask
 import com.tangerine.api.order.command.ApproveOrderPaymentCommand
 import com.tangerine.api.order.common.OrderStatus
 import com.tangerine.api.order.entity.OrderEntity
@@ -21,7 +23,6 @@ import com.tangerine.api.payment.response.success
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import mu.KotlinLogging
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,11 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.bean.override.mockito.MockitoBean
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ForkJoinPool
-import java.util.concurrent.TimeUnit
-
-private val logger = KotlinLogging.logger {}
 
 @SpringBootTest
 class ApproveOrderPaymentUseCaseConcurrencyTest {
@@ -121,6 +117,7 @@ class ApproveOrderPaymentUseCaseConcurrencyTest {
             submitConcurrencyTask(
                 task = approveOrderPaymentUseCase::approve,
                 request = approvalCommand,
+                threadCount = THREAD_COUNT,
             )
 
         // then
@@ -171,54 +168,7 @@ class ApproveOrderPaymentUseCaseConcurrencyTest {
         actualOrder.status shouldBe OrderStatus.DONE
     }
 
-    private fun <T, R> submitConcurrencyTask(
-        task: (T) -> R,
-        request: T,
-    ): List<TaskResult> =
-        (1..THREAD_COUNT)
-            .map {
-                CompletableFuture.supplyAsync {
-                    val commonPool = ForkJoinPool.commonPool()
-
-                    logger.debug(
-                        """Thread Pool 정보 - 현재 스레드 : ${Thread.currentThread().name}
-                        "병렬 처리 레벨: ${commonPool.parallelism}"
-                        "활성 스레드 수: ${commonPool.activeThreadCount}"
-                        "실행 중인 스레드 수: ${commonPool.runningThreadCount}"
-                        "대기 중인 작업 수: ${commonPool.queuedSubmissionCount}"
-                        "총 풀 크기: ${commonPool.poolSize}"
-                    """,
-                    )
-
-                    runTask(index = it, task = task, request = request)
-                }
-            }.map { it.get(20, TimeUnit.SECONDS) }
-
-    private fun <T, R> runTask(
-        index: Int,
-        task: (T) -> R,
-        request: T,
-    ): TaskResult =
-        try {
-            val result = task(request)
-            TaskResult.Success(index, result)
-        } catch (e: Exception) {
-            TaskResult.Failure(index, e)
-        }
-
-    sealed class TaskResult {
-        data class Success<R>(
-            val threadIndex: Int,
-            val result: R,
-        ) : TaskResult()
-
-        data class Failure(
-            val threadIndex: Int,
-            val exception: Exception,
-        ) : TaskResult()
-    }
-
     companion object {
-        const val THREAD_COUNT = 10
+        private const val THREAD_COUNT = 10
     }
 }

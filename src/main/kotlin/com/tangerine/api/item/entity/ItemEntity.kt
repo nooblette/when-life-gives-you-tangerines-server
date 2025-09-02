@@ -8,7 +8,9 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.PreUpdate
 import jakarta.persistence.Table
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "items")
@@ -26,4 +28,13 @@ class ItemEntity(
     val price: Int,
     @Column(nullable = false)
     var stock: Int,
-)
+    @Column(nullable = false)
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+    @Column(nullable = false)
+    var updatedAt: LocalDateTime = LocalDateTime.now(),
+) {
+    @PreUpdate
+    fun onUpdate() {
+        this.updatedAt = LocalDateTime.now()
+    }
+}

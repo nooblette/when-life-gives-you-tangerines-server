@@ -25,9 +25,8 @@ class OrderQueryService(
     @Transactional(readOnly = true)
     fun getOrderByOrderIdWithEntity(orderId: String): OrderWithEntity {
         val orderEntity =
-            requireNotNull(orderRepository.findByOrderId(orderId)) {
-                "잘못된 주문 Id 입니다."
-            }
+            orderRepository.findByOrderId(orderId)
+                ?: throw IllegalArgumentException("잘못된 주문 Id(Id = $orderId) 입니다.")
 
         val orderItems = orderItemRepository.findByOrder(orderEntity).toDomains()
 
