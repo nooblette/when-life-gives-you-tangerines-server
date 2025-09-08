@@ -1,7 +1,7 @@
 package com.tangerine.api.order.controller
 
 import com.tangerine.api.global.response.ErrorCodes
-import com.tangerine.api.item.exception.StockConflictException
+import com.tangerine.api.item.exception.StockLockTimeoutException
 import com.tangerine.api.order.fixture.builder.JsonOrderRequestBuilder
 import com.tangerine.api.order.fixture.builder.OrderRequestBuilder
 import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator
@@ -160,7 +160,7 @@ class OrderCommandControllerTest {
                 .withDefaultOrderName()
                 .build()
         whenever(orderPlaceUseCase.place(any()))
-            .thenThrow(StockConflictException(message = "잠시 후 다시 시도해주세요."))
+            .thenThrow(StockLockTimeoutException(message = "잠시 후 다시 시도해주세요."))
 
         // then
         performOrderRequest(requestOrder)

@@ -1,6 +1,6 @@
 package com.tangerine.api.order.usecase
 
-import com.tangerine.api.item.exception.StockConflictException
+import com.tangerine.api.item.exception.StockLockTimeoutException
 import com.tangerine.api.item.fixture.entity.createItemEntity
 import com.tangerine.api.item.repository.ItemRepository
 import com.tangerine.api.item.result.DecreaseStockResult
@@ -68,10 +68,10 @@ class OrderPlaceUseCaseTest {
         // given
         whenever(
             itemStockService.decreaseStockByOrderItems(anyList()),
-        ).thenThrow(StockConflictException("잠시 후 다시 시도해주세요."))
+        ).thenThrow(StockLockTimeoutException("잠시 후 다시 시도해주세요."))
 
         // when & then
-        shouldThrow<StockConflictException> {
+        shouldThrow<StockLockTimeoutException> {
             orderPlaceUseCase.place(command = newOrder)
         }
     }

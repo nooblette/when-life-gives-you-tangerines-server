@@ -11,6 +11,8 @@ spring:
         format_sql: true
         # 실행되는 SQL 설명 출력
         use_sql_comments: true
+    hibernate:
+      ddl-auto: create
   jackson:
     deserialization:
       # Primitive 타입(Int, Long)으로 정의된 필드에 JSON 값이 null이 들어오면 MismatchedInputException 발생
