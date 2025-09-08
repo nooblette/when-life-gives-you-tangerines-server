@@ -16,9 +16,9 @@ class ItemStockService(
     private val itemRepository: ItemRepository,
 ) {
     @Transactional
-    fun decreaseStockByOrderItems(orderItems: List<OrderItem>): DecreaseStockResult {
+    fun decrease(orderItems: List<OrderItem>): DecreaseStockResult {
         for (orderItem in orderItems) {
-            val result = decreaseStock(orderItem)
+            val result = decreaseByOrderItem(orderItem)
             if (result is DecreaseStockResult.Failure) {
                 return result
             }
@@ -27,7 +27,7 @@ class ItemStockService(
         return DecreaseStockResult.Success
     }
 
-    private fun decreaseStock(orderItem: OrderItem): DecreaseStockResult {
+    private fun decreaseByOrderItem(orderItem: OrderItem): DecreaseStockResult {
         val itemEntity =
             try {
                 itemRepository.findByIdWithPessimisticLock(orderItem.id)

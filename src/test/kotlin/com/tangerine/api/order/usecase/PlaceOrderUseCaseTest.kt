@@ -67,7 +67,7 @@ class PlaceOrderUseCaseTest {
     fun `상품 재고 처리 중 예외가 발생하면 그대로 전파한다`() {
         // given
         whenever(
-            itemStockService.decreaseStockByOrderItems(anyList()),
+            itemStockService.decrease(anyList()),
         ).thenThrow(StockLockTimeoutException("잠시 후 다시 시도해주세요."))
 
         // when & then
@@ -81,7 +81,7 @@ class PlaceOrderUseCaseTest {
         // given
         val message = "재고 처리 실패"
         whenever(
-            itemStockService.decreaseStockByOrderItems(anyList()),
+            itemStockService.decrease(anyList()),
         ).thenReturn(DecreaseStockResult.Failure(message = message))
 
         // when

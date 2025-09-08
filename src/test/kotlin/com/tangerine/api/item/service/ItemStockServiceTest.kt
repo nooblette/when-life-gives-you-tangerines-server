@@ -50,7 +50,7 @@ class ItemStockServiceTest {
 
         // when & then
         shouldThrow<IllegalArgumentException> {
-            itemStockService.decreaseStockByOrderItems(
+            itemStockService.decrease(
                 orderItems = listOf(existOrderItem, nonExistOrderItems),
             )
         }
@@ -66,7 +66,7 @@ class ItemStockServiceTest {
             )
 
         // when
-        val result = itemStockService.decreaseStockByOrderItems(orderItems = listOf(orderItem))
+        val result = itemStockService.decrease(orderItems = listOf(orderItem))
 
         // then
         result.shouldBeInstanceOf<DecreaseStockResult.Failure>()
@@ -83,7 +83,7 @@ class ItemStockServiceTest {
             )
 
         // when
-        val result = itemStockService.decreaseStockByOrderItems(orderItems = listOf(orderItem))
+        val result = itemStockService.decrease(orderItems = listOf(orderItem))
 
         // then
         result.shouldBeInstanceOf<DecreaseStockResult.Success>()
@@ -107,7 +107,7 @@ class ItemStockServiceTest {
         // when
         val results =
             submitConcurrencyTask(
-                task = itemStockService::decreaseStockByOrderItems,
+                task = itemStockService::decrease,
                 request = listOf(orderItem),
                 threadCount = threadCount,
             )

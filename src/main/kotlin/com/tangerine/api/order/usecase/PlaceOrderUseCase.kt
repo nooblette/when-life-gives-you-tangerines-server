@@ -17,7 +17,7 @@ class PlaceOrderUseCase(
     fun place(command: PlaceOrderCommand): PlaceOrderResult =
         when (
             // 주문 수량만큼 재고 차감
-            val decreaseStockResult = itemStockService.decreaseStockByOrderItems(command.items)
+            val decreaseStockResult = itemStockService.decrease(command.items)
         ) {
             is DecreaseStockResult.Failure -> {
                 PlaceOrderResult.Failure(reason = decreaseStockResult.message)
