@@ -16,7 +16,7 @@ class OrderCommandService(
     private val orderIdGenerator: OrderIdGenerator,
 ) {
     @Transactional
-    fun createOrder(command: PlaceOrderCommand): PlaceOrderResult {
+    fun place(command: PlaceOrderCommand): PlaceOrderResult {
         val orderId = orderIdGenerator.generate()
 
         // 주문 생성

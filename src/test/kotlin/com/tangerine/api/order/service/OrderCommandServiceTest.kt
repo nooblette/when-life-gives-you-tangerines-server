@@ -51,7 +51,7 @@ class OrderCommandServiceTest {
     @Test
     fun `주문 생성 성공 테스트`() {
         // when
-        val result = orderCommandService.createOrder(command = newOrder)
+        val result = orderCommandService.place(command = newOrder)
 
         // then
         result.shouldBeInstanceOf<PlaceOrderResult.Success>()

@@ -24,6 +24,6 @@ class PlaceOrderUseCase(
             }
 
             // 주문 생성
-            is DecreaseStockResult.Success -> orderCommandService.createOrder(command)
+            is DecreaseStockResult.Success -> orderCommandService.place(command)
         }
 }
