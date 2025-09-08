@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-class OrderPlaceUseCase(
+class PlaceOrderUseCase(
     private val itemStockService: ItemStockService,
     private val orderCommandService: OrderCommandService,
 ) {

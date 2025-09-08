@@ -6,7 +6,7 @@ import com.tangerine.api.order.fixture.builder.JsonOrderRequestBuilder
 import com.tangerine.api.order.fixture.builder.OrderRequestBuilder
 import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator
 import com.tangerine.api.order.result.PlaceOrderResult
-import com.tangerine.api.order.usecase.OrderPlaceUseCase
+import com.tangerine.api.order.usecase.PlaceOrderUseCase
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
@@ -25,7 +25,7 @@ class OrderCommandControllerTest {
     lateinit var mockMvc: MockMvc
 
     @MockitoBean
-    lateinit var orderPlaceUseCase: OrderPlaceUseCase
+    lateinit var placeOrderUseCase: PlaceOrderUseCase
 
     @Test
     fun `주문 요청 중 주문 정보 고객 필드가 누락되면 400에러를 반환한다`() {
@@ -159,7 +159,7 @@ class OrderCommandControllerTest {
                 .withDefaultTotalAmount()
                 .withDefaultOrderName()
                 .build()
-        whenever(orderPlaceUseCase.place(any()))
+        whenever(placeOrderUseCase.place(any()))
             .thenThrow(StockLockTimeoutException(message = "잠시 후 다시 시도해주세요."))
 
         // then
@@ -174,7 +174,7 @@ class OrderCommandControllerTest {
     fun `주문 요청 성공 테스트`() {
         // given
         val orderId = TestOrderIdGenerator.STUB_ORDER_ID
-        whenever(orderPlaceUseCase.place(any()))
+        whenever(placeOrderUseCase.place(any()))
             .thenReturn(PlaceOrderResult.Success(orderId))
 
         // when

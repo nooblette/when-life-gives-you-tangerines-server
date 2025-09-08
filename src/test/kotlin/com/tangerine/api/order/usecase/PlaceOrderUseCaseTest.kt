@@ -31,9 +31,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 
 @SpringBootTest
 @Import(TestOrderIdGenerator::class)
-class OrderPlaceUseCaseTest {
+class PlaceOrderUseCaseTest {
     @Autowired
-    private lateinit var orderPlaceUseCase: OrderPlaceUseCase
+    private lateinit var placeOrderUseCase: PlaceOrderUseCase
 
     @Autowired
     private lateinit var orderRepository: OrderRepository
@@ -72,7 +72,7 @@ class OrderPlaceUseCaseTest {
 
         // when & then
         shouldThrow<StockLockTimeoutException> {
-            orderPlaceUseCase.place(command = newOrder)
+            placeOrderUseCase.place(command = newOrder)
         }
     }
 
@@ -85,7 +85,7 @@ class OrderPlaceUseCaseTest {
         ).thenReturn(DecreaseStockResult.Failure(message = message))
 
         // when
-        val result = orderPlaceUseCase.place(command = newOrder)
+        val result = placeOrderUseCase.place(command = newOrder)
 
         // then
         result shouldBe PlaceOrderResult.Failure("재고 처리 실패")
@@ -94,7 +94,7 @@ class OrderPlaceUseCaseTest {
     @Test
     fun `주문 생성 성공 테스트`() {
         // when
-        val result = orderPlaceUseCase.place(command = newOrder)
+        val result = placeOrderUseCase.place(command = newOrder)
 
         // then
         result.shouldBeInstanceOf<PlaceOrderResult.Success>()
