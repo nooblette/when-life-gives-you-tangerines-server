@@ -17,6 +17,12 @@ spring:
     deserialization:
       # Primitive 타입(Int, Long)으로 정의된 필드에 JSON 값이 null이 들어오면 MismatchedInputException 발생
       fail-on-null-for-primitives: true
+server:
+  port: 443
+  ssl:
+    enabled: true
+    key-alias: bootsecurity
+    key-store-type: PKCS12
 logging:
   level:
     # JPA/Hibernate SQL 로깅
