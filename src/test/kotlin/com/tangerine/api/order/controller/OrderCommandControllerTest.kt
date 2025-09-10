@@ -8,6 +8,9 @@ import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator
 import com.tangerine.api.order.result.PlaceOrderResult
 import com.tangerine.api.order.usecase.PlaceOrderUseCase
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -143,6 +146,46 @@ class OrderCommandControllerTest {
         val requestOrder =
             OrderRequestBuilder()
                 .withOrderItemQuantityZero()
+                .build()
+
+        performOrderRequest(requestOrder)
+            .assertResponseCode(ErrorCodes.INVALID_ARGUMENT)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "name, 김철수박사님의아버지홍길동선생님과이순신장군님그리고세종대왕님까지모든분들께서함께하시는자리에서우리모두가하나가되어서평화롭게살아가며행복하게웃고있는모습들을보고",
+        "recipient, 김철수박사님의아버지홍길동선생님과이순신장군님그리고세종대왕님까지모든분들께서함께하시는자리에서우리모두가하나가되어서평화롭게살아가며행복하게웃고있는모습들을보고",
+        "address, 서울특별시 강남구 테헤란로 123번길 45-67 삼성타워 오피스텔 1234호 근처 편의점 앞 빨간 우체통 옆 카페에서 친구들과 만나기로 약속한장소",
+        "detailAddress, 서울특별시 강남구 테헤란로 123번길 45-67 삼성타워 오피스텔 1234호 근처 편의점 앞 빨간 우체통 옆 카페에서 친구들과 만나기로 약속한장소",
+    )
+    fun `글자수 제한을 초과하면 400에러를 반환한다`(
+        fieldName: String,
+        value: String,
+    ) {
+        val requestOrder =
+            JsonOrderRequestBuilder()
+                .withDefaultCustomer()
+                .withCustomerFieldAt(fieldName = fieldName, value = value)
+                .withDefaultItems()
+                .withDefaultTotalAmount()
+                .withDefaultOrderName()
+                .build()
+
+        performOrderRequest(requestOrder)
+            .assertResponseCode(ErrorCodes.INVALID_ARGUMENT)
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["010-123-4567", "02-123-4567", "01012345678", "010-1234-567"])
+    fun `전화번호 형식이 xxx-xxxx-xxxx 어긋나면 400에러를 반환한다`(invalidPhoneNumber: String) {
+        val requestOrder =
+            JsonOrderRequestBuilder()
+                .withDefaultCustomer()
+                .withCustomerFieldAt(fieldName = "phone", value = invalidPhoneNumber)
+                .withDefaultItems()
+                .withDefaultTotalAmount()
+                .withDefaultOrderName()
                 .build()
 
         performOrderRequest(requestOrder)

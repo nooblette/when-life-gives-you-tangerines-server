@@ -68,6 +68,14 @@ class JsonOrderRequestBuilder {
             (root.get("customer") as? ObjectNode)?.remove(fieldName)
         }
 
+    // customer 하위 특정 필드만 전달받은 파라미터로 변경
+    fun withCustomerFieldAt(
+        fieldName: String,
+        value: String,
+    ) = apply {
+        (root.get("customer") as? ObjectNode)?.put(fieldName, value)
+    }
+
     // items 키 전체를 제거
     fun withoutItems() =
         apply {
