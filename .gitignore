@@ -9,3 +9,5 @@
 # Ignore Spring Boot environment-specific configuration files
 application-*.yml
 /src/main/resources/keystore.p12
+
+docker-compose.yml

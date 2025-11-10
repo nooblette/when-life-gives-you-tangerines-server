@@ -1,0 +1,14 @@
+# JDK 21이 포함된 리눅스 이미지 사용
+FROM eclipse-temurin:21-jdk
+
+# 컨테이너 내부 작업 디렉토리
+WORKDIR /app
+
+# Spring Boot 빌드 결과물을 컨테이너 내부 작업 디렉토리로 복사
+COPY build/libs/*.jar app.jar
+
+ENV SPRING_PROFILES_ACTIVE=local
+EXPOSE 8080
+
+# 컨테이너 실행 시 명령
+ENTRYPOINT ["java", "-jar", "app.jar"]
