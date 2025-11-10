@@ -2,6 +2,7 @@ package com.tangerine.api.global.handler
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.tangerine.api.common.exception.ResourceConflictException
+import com.tangerine.api.common.exception.UnauthorizedException
 import com.tangerine.api.global.response.ApiResponse
 import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.order.exception.OrderAlreadyInProgressException
@@ -113,4 +114,14 @@ class GlobalExceptionHandler {
                 )
             }
         }
+
+    @ExceptionHandler(UnauthorizedException::class)
+    fun handleUnauthorizedException(exception: UnauthorizedException): ResponseEntity<ApiResponse.Error> =
+        ResponseEntity(
+            ApiResponse.Error(
+                message = exception.message,
+                code = exception.code,
+            ),
+            HttpStatus.UNAUTHORIZED,
+        )
 }
