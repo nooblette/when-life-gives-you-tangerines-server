@@ -3,13 +3,18 @@ package com.tangerine.api.order.controller
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.tangerine.api.global.response.ErrorCodes
+import com.tangerine.api.global.session.manager.SessionManager
 import com.tangerine.api.order.domain.Customer
 import com.tangerine.api.order.domain.OrderItem
 import com.tangerine.api.order.fixture.domain.OrderDomainFixture.createOrder
 import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator.Companion.STUB_ORDER_ID
 import com.tangerine.api.order.service.OrderQueryService
 import io.kotest.matchers.shouldBe
+import jakarta.servlet.http.Cookie
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -30,6 +35,14 @@ class OrderQueryControllerTest {
 
     @MockitoBean
     lateinit var orderQueryService: OrderQueryService
+
+    @MockitoBean
+    lateinit var sessionManager: SessionManager
+
+    @BeforeEach
+    fun setUp() {
+        doNothing().`when`(sessionManager).validateAndExtendSession(any())
+    }
 
     @Test
     fun `orderId에 해당하는 주문 정보가 없는 경우 400에러를 반환한다`() {
@@ -72,6 +85,7 @@ class OrderQueryControllerTest {
     private fun performOrderRequest(): ResultActionsDsl =
         mockMvc.get(ORDER_URL, ORDER_ID) {
             contentType = MediaType.APPLICATION_JSON
+            cookie(Cookie("sessionId", "123"))
         }
 
     private inline fun <reified T> MvcResult.json(path: String): T {

@@ -1,16 +1,20 @@
 package com.tangerine.api.order.controller
 
 import com.tangerine.api.global.response.ErrorCodes
+import com.tangerine.api.global.session.manager.SessionManager
 import com.tangerine.api.order.exception.OrderAlreadyInProgressException
 import com.tangerine.api.order.fixture.builder.JsonOrderPaymentApprovalRequestBuilder
 import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator
 import com.tangerine.api.order.result.ApproveOrderPaymentResult
 import com.tangerine.api.order.result.EvaluateOrderPaymentResult
 import com.tangerine.api.order.usecase.ApproveOrderPaymentUseCase
+import jakarta.servlet.http.Cookie
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -29,6 +33,14 @@ class OrderPaymentApprovalControllerTest {
 
     @MockitoBean
     lateinit var approveOrderPaymentUseCase: ApproveOrderPaymentUseCase
+
+    @MockitoBean
+    lateinit var sessionManager: SessionManager
+
+    @BeforeEach
+    fun setUp() {
+        doNothing().`when`(sessionManager).validateAndExtendSession(any())
+    }
 
     @Test
     fun `주문 결제 요청 본문이 누락되면 400에러를 반환한다`() {
@@ -129,6 +141,7 @@ class OrderPaymentApprovalControllerTest {
         mockMvc.post(ORDER_PAYMENT_APPROVAL_URL) {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
+            cookie(Cookie("sessionId", "123"))
         }
 
     // 응답 및 에러 코드 검증

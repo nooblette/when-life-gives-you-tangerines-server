@@ -1,17 +1,21 @@
 package com.tangerine.api.order.controller
 
 import com.tangerine.api.global.response.ErrorCodes
+import com.tangerine.api.global.session.manager.SessionManager
 import com.tangerine.api.item.exception.StockLockTimeoutException
 import com.tangerine.api.order.fixture.builder.JsonOrderRequestBuilder
 import com.tangerine.api.order.fixture.builder.OrderRequestBuilder
 import com.tangerine.api.order.fixture.domain.generator.TestOrderIdGenerator
 import com.tangerine.api.order.result.PlaceOrderResult
 import com.tangerine.api.order.usecase.PlaceOrderUseCase
+import jakarta.servlet.http.Cookie
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -29,6 +33,14 @@ class OrderCommandControllerTest {
 
     @MockitoBean
     lateinit var placeOrderUseCase: PlaceOrderUseCase
+
+    @MockitoBean
+    lateinit var sessionManager: SessionManager
+
+    @BeforeEach
+    fun setUp() {
+        doNothing().`when`(sessionManager).validateAndExtendSession(any())
+    }
 
     @Test
     fun `주문 요청 중 주문 정보 고객 필드가 누락되면 400에러를 반환한다`() {
@@ -244,6 +256,7 @@ class OrderCommandControllerTest {
         mockMvc.post(ORDER_URL) {
             contentType = MediaType.APPLICATION_JSON
             content = requestJson
+            cookie(Cookie("sessionId", "123"))
         }
 
     // 응답 및 에러 코드 검증
