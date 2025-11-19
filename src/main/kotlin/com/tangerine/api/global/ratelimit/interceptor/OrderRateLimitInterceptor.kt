@@ -1,15 +1,17 @@
-package com.tangerine.api.global.session.interceptor
+package com.tangerine.api.global.ratelimit.interceptor
 
 import com.tangerine.api.global.extensions.getMySessionId
-import com.tangerine.api.global.session.manager.SessionManager
+import com.tangerine.api.global.ratelimit.RateLimiter
+import com.tangerine.api.global.ratelimit.enum.RateLimitType
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
+import java.time.Duration
 
 @Component
-class SessionValidationInterceptor(
-    private val sessionManager: SessionManager,
+class OrderRateLimitInterceptor(
+    private val rateLimiter: RateLimiter,
 ) : HandlerInterceptor {
     override fun preHandle(
         request: HttpServletRequest,
@@ -21,7 +23,16 @@ class SessionValidationInterceptor(
             return true
         }
 
-        sessionManager.validateAndExtendSession(request.getMySessionId())
-        return true
+        return rateLimiter.tryAcquire(
+            type = RateLimitType.SESSION,
+            key = request.getMySessionId(),
+            limit = LIMIT,
+            duration = Duration.ofMinutes(DURATION),
+        )
+    }
+
+    companion object {
+        const val LIMIT = 100
+        const val DURATION = 1L
     }
 }

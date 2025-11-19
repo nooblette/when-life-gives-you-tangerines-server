@@ -1,6 +1,7 @@
 package com.tangerine.api.global.handler
 
 import com.fasterxml.jackson.databind.JsonMappingException
+import com.tangerine.api.common.exception.RateLimitExceededException
 import com.tangerine.api.common.exception.ResourceConflictException
 import com.tangerine.api.common.exception.UnauthorizedException
 import com.tangerine.api.global.response.ApiResponse
@@ -123,5 +124,15 @@ class GlobalExceptionHandler {
                 code = exception.code,
             ),
             HttpStatus.UNAUTHORIZED,
+        )
+
+    @ExceptionHandler(RateLimitExceededException::class)
+    fun handleRateLimitExceededException(exception: RateLimitExceededException): ResponseEntity<ApiResponse.Error> =
+        ResponseEntity(
+            ApiResponse.Error(
+                message = exception.message,
+                code = exception.code,
+            ),
+            HttpStatus.TOO_MANY_REQUESTS,
         )
 }

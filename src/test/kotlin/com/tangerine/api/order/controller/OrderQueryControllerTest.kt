@@ -2,6 +2,7 @@ package com.tangerine.api.order.controller
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.tangerine.api.global.ratelimit.RateLimiter
 import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.global.session.manager.SessionManager
 import com.tangerine.api.order.domain.Customer
@@ -39,9 +40,13 @@ class OrderQueryControllerTest {
     @MockitoBean
     lateinit var sessionManager: SessionManager
 
+    @MockitoBean
+    lateinit var rateLimiter: RateLimiter
+
     @BeforeEach
     fun setUp() {
         doNothing().`when`(sessionManager).validateAndExtendSession(any())
+        whenever(rateLimiter.tryAcquire(any(), any(), any(), any())).thenReturn(true)
     }
 
     @Test

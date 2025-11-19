@@ -1,5 +1,6 @@
 package com.tangerine.api.order.controller
 
+import com.tangerine.api.global.ratelimit.RateLimiter
 import com.tangerine.api.global.response.ErrorCodes
 import com.tangerine.api.global.session.manager.SessionManager
 import com.tangerine.api.order.exception.OrderAlreadyInProgressException
@@ -37,9 +38,13 @@ class OrderPaymentApprovalControllerTest {
     @MockitoBean
     lateinit var sessionManager: SessionManager
 
+    @MockitoBean
+    lateinit var rateLimiter: RateLimiter
+
     @BeforeEach
     fun setUp() {
         doNothing().`when`(sessionManager).validateAndExtendSession(any())
+        whenever(rateLimiter.tryAcquire(any(), any(), any(), any())).thenReturn(true)
     }
 
     @Test
