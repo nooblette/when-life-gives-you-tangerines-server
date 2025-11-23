@@ -6,4 +6,5 @@ enum class OrderStatus {
     PAYMENT_FAILURE,
     DONE,
     EXPIRED,
+    SHIPMENT_REGISTERED,
 }
